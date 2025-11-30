@@ -81,7 +81,7 @@ const EditorObject = React.memo(({ id, type, position, rotation, scale, color, d
                     <Component color={color} data={data} onUpdate={handleUpdate} />
                 ) : (
                     // Fallback for legacy objects
-                    <mesh castShadow receiveShadow>
+                    <mesh>
                         <boxGeometry />
                         <meshStandardMaterial color={color} />
                     </mesh>

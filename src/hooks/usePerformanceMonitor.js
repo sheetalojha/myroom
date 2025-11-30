@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 
-// Performance thresholds
-const LOW_FPS_THRESHOLD = 30; // FPS below this triggers warning
-const CRITICAL_FPS_THRESHOLD = 20; // FPS below this triggers critical adjustment
-const SAMPLE_WINDOW = 60; // Number of frames to sample
+// Performance thresholds - More lenient to prevent false positives
+const LOW_FPS_THRESHOLD = 20; // FPS below this triggers warning (was 30)
+const CRITICAL_FPS_THRESHOLD = 10; // FPS below this triggers critical adjustment (was 20)
+const SAMPLE_WINDOW = 120; // Number of frames to sample (increased for more stable average)
 
 export const usePerformanceMonitor = () => {
     const [performanceState, setPerformanceState] = useState({

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
+import { DEFAULT_ROOM_CONFIG, COLOR_THEMES, LIGHTING_PRESETS } from '../config/roomThemes';
 
 // Grid configuration - matches Room.jsx
 const GRID_SIZE = 20;
@@ -39,10 +40,12 @@ const useStore = create((set, get) => ({
   selectedId: null,
   gridEnabled: true, // Enable grid snapping by default
   mode: 'edit', // 'edit' or 'view'
+  // Room configuration - JSON structure
+  roomConfig: DEFAULT_ROOM_CONFIG,
   // Performance settings
   performanceMode: 'high', // 'high', 'medium', 'low'
   shadowQuality: 2048, // Shadow map size
-  enableShadows: true, // Enable shadows
+  enableShadows: false, // Disable shadows for performance
   ssaoSamples: 16, // SSAO sample count
   ssaoRadius: 6, // SSAO radius
   ssaoIntensity: 30, // SSAO intensity
@@ -110,7 +113,49 @@ const useStore = create((set, get) => ({
   },
 
   loadScene: (sceneData) => {
-    set({ objects: sceneData.objects || [] });
+    set({ 
+      objects: sceneData.objects || [],
+      roomConfig: sceneData.roomConfig || DEFAULT_ROOM_CONFIG
+    });
+  },
+
+  // Room configuration methods
+  setColorTheme: (themeName) => {
+    const theme = COLOR_THEMES[themeName];
+    if (theme) {
+      set((state) => ({
+        roomConfig: {
+          ...state.roomConfig,
+          colorTheme: themeName,
+          background: theme.background,
+          leftWall: theme.leftWall,
+          rightWall: theme.rightWall,
+          backWall: theme.backWall,
+          floor: theme.floor
+        }
+      }));
+    }
+  },
+
+  setLighting: (lightingName) => {
+    const lighting = LIGHTING_PRESETS[lightingName];
+    if (lighting) {
+      set((state) => ({
+        roomConfig: {
+          ...state.roomConfig,
+          lighting: lightingName
+        }
+      }));
+    }
+  },
+
+  updateRoomConfig: (updates) => {
+    set((state) => ({
+      roomConfig: {
+        ...state.roomConfig,
+        ...updates
+      }
+    }));
   },
 
   setMode: (mode) => {

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
+import useStore from '../store/useStore';
 
 const ROOM_SIZE = 20;
 const WALL_HEIGHT = 10;
@@ -39,15 +40,15 @@ const createNoiseTexture = () => {
 };
 
 // Thick Floor Slab with Medium Oak/Chestnut Wood
-const ThickFloor = () => {
+const ThickFloor = ({ config }) => {
     const plankWidth = 1.0;
     // Extend floor to cover under walls
     const floorExtend = WALL_THICKNESS;
     const floorSize = ROOM_SIZE + floorExtend * 2;
     const planks = Math.ceil(floorSize / plankWidth);
-    // Medium oak/chestnut - reddish-orange-brown, more saturated
-    const woodColor1 = "#8B5A3C"; // Medium chestnut
-    const woodColor2 = "#A06647"; // Lighter chestnut
+    // Use config colors or defaults
+    const woodColor1 = config?.color || "#8B5A3C"; // Medium chestnut
+    const woodColor2 = config?.color2 || "#A06647"; // Lighter chestnut
     
     return (
         <group>
@@ -55,8 +56,6 @@ const ThickFloor = () => {
             <mesh 
                 rotation={[-Math.PI / 2, 0, 0]} 
                 position={[0, -FLOOR_THICKNESS / 2, 0]} 
-                castShadow
-                receiveShadow
             >
                 <boxGeometry args={[floorSize, floorSize, FLOOR_THICKNESS]} />
                 <meshStandardMaterial
@@ -74,8 +73,6 @@ const ThickFloor = () => {
                         key={i}
                         rotation={[-Math.PI / 2, 0, 0]}
                         position={[x, 0.001, 0]}
-                        receiveShadow
-                        castShadow
                     >
                         <planeGeometry args={[plankWidth - 0.02, floorSize]} />
                         <meshStandardMaterial
@@ -211,7 +208,7 @@ const VoxelWall = ({ position, rotation, width, height, wallColor, wallTopColor 
     return (
         <group position={position} rotation={rotation || [0, 0, 0]}>
             {/* Main wall body - thick box */}
-            <mesh receiveShadow castShadow>
+            <mesh>
                 <boxGeometry args={[width, height, WALL_THICKNESS]} />
                 <meshStandardMaterial
                     color={wallColor}
@@ -233,7 +230,6 @@ const VoxelWall = ({ position, rotation, width, height, wallColor, wallTopColor 
                         <mesh
                             position={[0, blockHeight / 2, 0]}
                             rotation={[Math.PI / 2, 0, 0]}
-                            castShadow
                         >
                             <planeGeometry args={[VOXEL_SIZE - 0.02, WALL_THICKNESS]} />
                             <meshStandardMaterial
@@ -244,7 +240,7 @@ const VoxelWall = ({ position, rotation, width, height, wallColor, wallTopColor 
                         </mesh>
                         
                         {/* Side block - with proper UV mapping */}
-                        <mesh castShadow>
+                        <mesh>
                             <boxGeometry args={[VOXEL_SIZE - 0.02, blockHeight, WALL_THICKNESS]} />
                             <meshStandardMaterial
                                 color={wallColor}
@@ -258,7 +254,7 @@ const VoxelWall = ({ position, rotation, width, height, wallColor, wallTopColor 
             })}
             
             {/* Inner face with texture */}
-            <mesh position={[0, 0, WALL_THICKNESS / 2]} receiveShadow>
+            <mesh position={[0, 0, WALL_THICKNESS / 2]}>
                 <planeGeometry args={[width, height]} />
                 <meshStandardMaterial
                     color={wallColor}
@@ -272,12 +268,16 @@ const VoxelWall = ({ position, rotation, width, height, wallColor, wallTopColor 
 };
 
 // Back Wall with Window - Voxel style
-const BackWall = () => {
-    const wallColor = "#E8E8E5"; // Cool grey/off-white
-    const wallTopColor = "#F0F0ED"; // Lighter for top surfaces
+const BackWall = ({ config }) => {
+    const wallColor = config?.color || "#E8E8E5";
+    const wallTopColor = config?.topColor || "#F0F0ED";
+    const visible = config?.visible !== false;
     const windowWidth = 4;
     const windowHeight = 3;
     const windowY = 2;
+    
+    if (!visible) return null;
+    
     // Extend wall to match extended floor
     const floorExtend = WALL_THICKNESS;
     const extendedRoomSize = ROOM_SIZE + floorExtend * 2;
@@ -294,7 +294,7 @@ const BackWall = () => {
             />
             
             {/* Window opening */}
-            <mesh position={[0, windowY - WALL_HEIGHT / 2, WALL_THICKNESS / 2 + 0.01]} castShadow>
+            <mesh position={[0, windowY - WALL_HEIGHT / 2, WALL_THICKNESS / 2 + 0.01]}>
                 <boxGeometry args={[windowWidth + 0.3, windowHeight + 0.3, 0.2]} />
                 <meshStandardMaterial color="#D4C5B9" roughness={0.8} />
             </mesh>
@@ -329,9 +329,13 @@ const BackWall = () => {
 };
 
 // Right Wall - Voxel style with stepped border
-const RightWall = () => {
-    const wallColor = "#D8D8D5"; // Cool grey, slightly darker than back wall
-    const wallTopColor = "#E5E5E2"; // Lighter for top surfaces
+const RightWall = ({ config }) => {
+    const wallColor = config?.color || "#D8D8D5";
+    const wallTopColor = config?.topColor || "#E5E5E2";
+    const visible = config?.visible !== false;
+    
+    if (!visible) return null;
+    
     // Extend wall to match extended floor
     const floorExtend = WALL_THICKNESS;
     const extendedRoomSize = ROOM_SIZE + floorExtend * 2;
@@ -339,6 +343,32 @@ const RightWall = () => {
     
     return (
         <group position={[wallX, WALL_HEIGHT / 2, 0]} rotation={[0, Math.PI / 2, 0]}>
+            <VoxelWall
+                position={[0, 0, 0]}
+                width={extendedRoomSize}
+                height={WALL_HEIGHT}
+                wallColor={wallColor}
+                wallTopColor={wallTopColor}
+            />
+        </group>
+    );
+};
+
+// Left Wall - Voxel style with stepped border
+const LeftWall = ({ config }) => {
+    const wallColor = config?.color || "#D8D8D5";
+    const wallTopColor = config?.topColor || "#E5E5E2";
+    const visible = config?.visible !== false;
+    
+    if (!visible) return null;
+    
+    // Extend wall to match extended floor
+    const floorExtend = WALL_THICKNESS;
+    const extendedRoomSize = ROOM_SIZE + floorExtend * 2;
+    const wallX = extendedRoomSize / 2 + WALL_THICKNESS / 2;
+    
+    return (
+        <group position={[wallX, WALL_HEIGHT / 2, 0]} rotation={[0, -Math.PI / 2, 0]}>
             <VoxelWall
                 position={[0, 0, 0]}
                 width={extendedRoomSize}
@@ -377,7 +407,7 @@ const CornerDetail = () => {
     
     return (
         <group position={[cornerX, WALL_HEIGHT / 2, cornerZ]}>
-            <mesh castShadow>
+            <mesh>
                 <boxGeometry args={[WALL_THICKNESS, WALL_HEIGHT, WALL_THICKNESS]} />
                 <meshStandardMaterial color="#9AABC6" roughness={0.7} />
             </mesh>
@@ -386,19 +416,24 @@ const CornerDetail = () => {
 };
 
 const Room = () => {
+    const roomConfig = useStore((state) => state.roomConfig);
+    
     return (
         <group>
             {/* Thick Floor Slab */}
-            <ThickFloor />
+            <ThickFloor config={roomConfig.floor} />
             
             {/* Floor Grid */}
             <FloorGrid />
             
             {/* Back Wall with Window - Voxel style */}
-            <BackWall />
+            <BackWall config={roomConfig.backWall} />
             
             {/* Right Wall - Voxel style */}
-            <RightWall />
+            <RightWall config={roomConfig.rightWall} />
+            
+            {/* Left Wall - Voxel style */}
+            <LeftWall config={roomConfig.leftWall} />
             
             {/* Corner Details */}
             <CornerDetail />

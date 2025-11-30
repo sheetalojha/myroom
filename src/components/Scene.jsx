@@ -6,6 +6,7 @@ import useStore from '../store/useStore';
 import Room from './Room';
 import EditorObject from './EditorObject';
 import { usePerformanceMonitor } from '../hooks/usePerformanceMonitor';
+import { LIGHTING_PRESETS } from '../config/roomThemes';
 import * as THREE from 'three';
 
 // True isometric camera configuration
@@ -141,21 +142,6 @@ const IsometricOrbitControls = ({ enabled }) => {
     );
 };
 
-// Shadow Catcher Plane for drop shadow - positioned below the room
-const ShadowCatcher = ({ enabled }) => {
-    if (!enabled) return null;
-    
-    return (
-        <mesh
-            rotation={[-Math.PI / 2, 0, 0]}
-            position={[0, -1, 0]}
-            receiveShadow
-        >
-            <planeGeometry args={[60, 60]} />
-            <shadowMaterial transparent opacity={0.4} color="#000000" />
-        </mesh>
-    );
-};
 
 // Performance Monitor Component (inside Canvas)
 const PerformanceMonitor = () => {
@@ -163,11 +149,21 @@ const PerformanceMonitor = () => {
     const adjustPerformanceSettings = useStore((state) => state.adjustPerformanceSettings);
     const setPerformanceNotification = useStore((state) => state.setPerformanceNotification);
     
-    const previousPerformanceState = useRef({ isCritical: false, isLowPerformance: false });
+    const previousPerformanceState = useRef({ 
+        isCritical: false, 
+        isLowPerformance: false,
+        showNotification: false 
+    });
+    const notificationCooldown = useRef(0);
+    const lastNotificationTime = useRef(0);
+    const COOLDOWN_PERIOD = 10000; // 10 seconds cooldown between notifications
 
     useEffect(() => {
         const wasLowPerformance = previousPerformanceState.current.isLowPerformance || previousPerformanceState.current.isCritical;
         const isNowLowPerformance = performanceState.isLowPerformance || performanceState.isCritical;
+        const wasShowingNotification = previousPerformanceState.current.showNotification;
+        const isShowingNotification = performanceState.showNotification;
+        const now = Date.now();
 
         // Only adjust settings when transitioning TO low performance
         if (isNowLowPerformance && !wasLowPerformance) {
@@ -178,21 +174,31 @@ const PerformanceMonitor = () => {
             }
         }
 
-        // Update notification in store for UI - only show when transitioning
-        if (performanceState.showNotification) {
-            setPerformanceNotification({
-                show: true,
-                message: performanceState.notificationMessage,
-                isCritical: performanceState.isCritical
-            });
-        } else {
+        // Only show notification if:
+        // 1. It's requesting to show
+        // 2. It wasn't showing before
+        // 3. Enough time has passed since last notification (cooldown)
+        if (isShowingNotification && !wasShowingNotification) {
+            const timeSinceLastNotification = now - lastNotificationTime.current;
+            
+            if (timeSinceLastNotification >= COOLDOWN_PERIOD) {
+                lastNotificationTime.current = now;
+                setPerformanceNotification({
+                    show: true,
+                    message: performanceState.notificationMessage,
+                    isCritical: performanceState.isCritical
+                });
+            }
+        } else if (!isShowingNotification && wasShowingNotification) {
+            // Clear notification when it's dismissed
             setPerformanceNotification(null);
         }
 
         // Update previous state
         previousPerformanceState.current = {
             isCritical: performanceState.isCritical,
-            isLowPerformance: performanceState.isLowPerformance
+            isLowPerformance: performanceState.isLowPerformance,
+            showNotification: performanceState.showNotification
         };
     }, [performanceState, adjustPerformanceSettings, setPerformanceNotification]);
 
@@ -204,8 +210,7 @@ const Scene = () => {
     const selectedId = useStore((state) => state.selectedId);
     const selectObject = useStore((state) => state.selectObject);
     const mode = useStore((state) => state.mode);
-    const shadowQuality = useStore((state) => state.shadowQuality);
-    const enableShadows = useStore((state) => state.enableShadows);
+    const roomConfig = useStore((state) => state.roomConfig);
     const ssaoSamples = useStore((state) => state.ssaoSamples);
     const ssaoRadius = useStore((state) => state.ssaoRadius);
     const ssaoIntensity = useStore((state) => state.ssaoIntensity);
@@ -213,9 +218,12 @@ const Scene = () => {
     const enablePostProcessing = useStore((state) => state.enablePostProcessing);
     const isEditMode = mode === 'edit';
 
+    // Get lighting preset
+    const lightingPreset = LIGHTING_PRESETS[roomConfig?.lighting] || LIGHTING_PRESETS.medium;
+
     return (
         <Canvas 
-            shadows={enableShadows}
+            shadows={false}
             gl={{ antialias: true, alpha: true }}
             dpr={1}
             performance={{ min: 0.5 }}
@@ -226,45 +234,26 @@ const Scene = () => {
             {/* Setup orthographic camera */}
             <OrthographicCamera />
 
-            {/* Ambient light - subtle */}
-            <ambientLight intensity={0.3} color="#FFFFFF" />
+            {/* Ambient light - from config */}
+            <ambientLight intensity={lightingPreset.ambientIntensity} color={lightingPreset.color} />
             
             {/* Main directional light - from top-left like sun */}
             <directionalLight
                 position={[15, 20, 10]}
-                intensity={1.5}
-                color="#FFFFFF"
-                castShadow={enableShadows}
-                shadow-mapSize={enableShadows ? [shadowQuality, shadowQuality] : [512, 512]}
-                shadow-camera-far={60}
-                shadow-camera-left={-20}
-                shadow-camera-right={20}
-                shadow-camera-top={20}
-                shadow-camera-bottom={-20}
-                shadow-bias={-0.0001}
-                shadow-normalBias={0.02}
+                intensity={lightingPreset.directionalIntensity}
+                color={lightingPreset.color}
             />
             
             {/* Fill light from opposite side - subtle */}
             <directionalLight
                 position={[-10, 8, -10]}
-                intensity={0.2}
-                color="#FFFFFF"
+                intensity={lightingPreset.fillIntensity}
+                color={lightingPreset.color}
             />
 
             {/* Post Processing Effects - Dynamically adjusted for performance */}
             {enablePostProcessing && (
                 <EffectComposer>
-                    {/* SSAO only works well with shadows enabled */}
-                    {enableShadows && (
-                        <SSAO
-                            samples={ssaoSamples}
-                            radius={ssaoRadius}
-                            intensity={ssaoIntensity}
-                            luminanceInfluence={0.1}
-                            color="#000000"
-                        />
-                    )}
                     <Bloom
                         luminanceThreshold={0.95}
                         intensity={bloomIntensity}
@@ -272,9 +261,6 @@ const Scene = () => {
                     />
                 </EffectComposer>
             )}
-
-            {/* Shadow catcher for drop shadow */}
-            <ShadowCatcher enabled={enableShadows} />
 
             <Room />
 

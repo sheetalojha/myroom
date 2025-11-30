@@ -3,6 +3,7 @@ import useStore from '../store/useStore';
 import { Leva } from 'leva';
 import { Registry, Categories } from './library/Registry';
 import PerformanceNotification from './PerformanceNotification';
+import { COLOR_THEMES, LIGHTING_PRESETS, WALL_COLOR_PRESETS, FLOOR_COLOR_PRESETS } from '../config/roomThemes';
 import {
     Armchair,
     Lamp,
@@ -14,7 +15,9 @@ import {
     X,
     Box,
     Edit3,
-    Eye
+    Eye,
+    Palette,
+    Settings
 } from 'lucide-react';
 
 const CategoryIcons = {
@@ -36,11 +39,17 @@ const UIOverlay = () => {
 
     const [activeCategory, setActiveCategory] = useState('Furniture');
     const [libraryOpen, setLibraryOpen] = useState(true);
+    const [customizeOpen, setCustomizeOpen] = useState(false);
+    
+    const roomConfig = useStore((state) => state.roomConfig);
+    const setColorTheme = useStore((state) => state.setColorTheme);
+    const setLighting = useStore((state) => state.setLighting);
+    const updateRoomConfig = useStore((state) => state.updateRoomConfig);
     
     const isEditMode = mode === 'edit';
 
     const handleSave = () => {
-        const data = JSON.stringify({ objects });
+        const data = JSON.stringify({ objects, roomConfig });
         const blob = new Blob([data], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -163,31 +172,62 @@ const UIOverlay = () => {
 
                 {/* Library Toggle - only in edit mode */}
                 {isEditMode && (
-                    <button
-                        onClick={() => setLibraryOpen(!libraryOpen)}
-                        style={{
-                            background: 'rgba(255, 255, 255, 0.95)',
-                            backdropFilter: 'blur(16px)',
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
-                            borderRadius: '20px',
-                            width: 32,
-                            height: 32,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
-                        }}
-                    >
-                        {libraryOpen ? <X size={14} color="#1A202C" /> : <Menu size={14} color="#1A202C" />}
-                    </button>
+                    <>
+                        <button
+                            onClick={() => setLibraryOpen(!libraryOpen)}
+                            style={{
+                                background: 'rgba(255, 255, 255, 0.95)',
+                                backdropFilter: 'blur(16px)',
+                                border: '1px solid rgba(255, 255, 255, 0.3)',
+                                borderRadius: '20px',
+                                width: 32,
+                                height: 32,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
+                            }}
+                        >
+                            {libraryOpen ? <X size={14} color="#1A202C" /> : <Menu size={14} color="#1A202C" />}
+                        </button>
+                        <button
+                            onClick={() => setCustomizeOpen(!customizeOpen)}
+                            style={{
+                                background: customizeOpen ? '#1A202C' : 'rgba(255, 255, 255, 0.95)',
+                                backdropFilter: 'blur(16px)',
+                                border: '1px solid rgba(255, 255, 255, 0.3)',
+                                borderRadius: '20px',
+                                width: 32,
+                                height: 32,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                            }}
+                            onMouseEnter={(e) => {
+                                if (!customizeOpen) {
+                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (!customizeOpen) {
+                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
+                                }
+                            }}
+                        >
+                            <Palette size={14} color={customizeOpen ? "#FFFFFF" : "#1A202C"} />
+                        </button>
+                    </>
                 )}
             </div>
 
@@ -256,6 +296,303 @@ const UIOverlay = () => {
                         <Upload size={12} /> Load
                         <input type="file" accept=".json" onChange={handleLoad} style={{ display: 'none' }} />
                     </label>
+                </div>
+            )}
+
+            {/* Right Sidebar - Customization Panel - only in edit mode */}
+            {isEditMode && customizeOpen && (
+                <div style={{
+                    position: 'absolute',
+                    top: 72,
+                    right: 24,
+                    bottom: 24,
+                    width: 320,
+                    maxHeight: 'calc(100vh - 96px)',
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(16px)',
+                    borderRadius: '16px',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    pointerEvents: 'auto',
+                    overflow: 'hidden',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    zIndex: 90
+                }}>
+                    <div style={{
+                        padding: '16px',
+                        borderBottom: '1px solid rgba(0,0,0,0.06)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8
+                    }}>
+                        <Settings size={16} color="#1A202C" />
+                        <span style={{
+                            fontSize: 14,
+                            fontWeight: 600,
+                            color: '#1A202C'
+                        }}>
+                            Customize Room
+                        </span>
+                    </div>
+
+                    <div style={{
+                        flex: 1,
+                        overflowY: 'auto',
+                        padding: '16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 20
+                    }}>
+                        {/* Color Theme */}
+                        <div>
+                            <label style={{
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: '#1A202C',
+                                marginBottom: 8,
+                                display: 'block'
+                            }}>
+                                Color Theme
+                            </label>
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(2, 1fr)',
+                                gap: 8
+                            }}>
+                                {Object.entries(COLOR_THEMES).map(([key, theme]) => (
+                                    <button
+                                        key={key}
+                                        onClick={() => setColorTheme(key)}
+                                        style={{
+                                            padding: '10px 12px',
+                                            borderRadius: '8px',
+                                            border: roomConfig.colorTheme === key 
+                                                ? '2px solid #1A202C' 
+                                                : '1px solid rgba(0,0,0,0.1)',
+                                            background: roomConfig.colorTheme === key 
+                                                ? '#1A202C' 
+                                                : 'rgba(0,0,0,0.02)',
+                                            color: roomConfig.colorTheme === key ? '#FFFFFF' : '#1A202C',
+                                            cursor: 'pointer',
+                                            fontSize: 11,
+                                            fontWeight: 500,
+                                            transition: 'all 0.15s ease',
+                                            textAlign: 'left'
+                                        }}
+                                    >
+                                        {theme.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Lighting */}
+                        <div>
+                            <label style={{
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: '#1A202C',
+                                marginBottom: 8,
+                                display: 'block'
+                            }}>
+                                Lighting
+                            </label>
+                            <div style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: 8
+                            }}>
+                                {Object.entries(LIGHTING_PRESETS).map(([key, preset]) => (
+                                    <button
+                                        key={key}
+                                        onClick={() => setLighting(key)}
+                                        style={{
+                                            padding: '8px 12px',
+                                            borderRadius: '8px',
+                                            border: roomConfig.lighting === key 
+                                                ? '2px solid #1A202C' 
+                                                : '1px solid rgba(0,0,0,0.1)',
+                                            background: roomConfig.lighting === key 
+                                                ? '#1A202C' 
+                                                : 'rgba(0,0,0,0.02)',
+                                            color: roomConfig.lighting === key ? '#FFFFFF' : '#1A202C',
+                                            cursor: 'pointer',
+                                            fontSize: 11,
+                                            fontWeight: 500,
+                                            transition: 'all 0.15s ease'
+                                        }}
+                                    >
+                                        {preset.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Wall Colors */}
+                        <div>
+                            <label style={{
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: '#1A202C',
+                                marginBottom: 8,
+                                display: 'block'
+                            }}>
+                                Wall Colors
+                            </label>
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(4, 1fr)',
+                                gap: 8
+                            }}>
+                                {WALL_COLOR_PRESETS.map((preset, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => {
+                                            updateRoomConfig({
+                                                leftWall: {
+                                                    ...roomConfig.leftWall,
+                                                    color: preset.color,
+                                                    topColor: preset.topColor
+                                                },
+                                                rightWall: {
+                                                    ...roomConfig.rightWall,
+                                                    color: preset.color,
+                                                    topColor: preset.topColor
+                                                },
+                                                backWall: {
+                                                    ...roomConfig.backWall,
+                                                    color: preset.color,
+                                                    topColor: preset.topColor
+                                                }
+                                            });
+                                        }}
+                                        style={{
+                                            aspectRatio: '1',
+                                            borderRadius: '8px',
+                                            border: '1px solid rgba(0,0,0,0.1)',
+                                            background: preset.color,
+                                            cursor: 'pointer',
+                                            transition: 'all 0.15s ease',
+                                            position: 'relative'
+                                        }}
+                                        title={preset.name}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = 'scale(1.05)';
+                                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = 'scale(1)';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Floor Colors */}
+                        <div>
+                            <label style={{
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: '#1A202C',
+                                marginBottom: 8,
+                                display: 'block'
+                            }}>
+                                Floor Colors
+                            </label>
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(4, 1fr)',
+                                gap: 8
+                            }}>
+                                {FLOOR_COLOR_PRESETS.map((preset, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => {
+                                            updateRoomConfig({
+                                                floor: {
+                                                    ...roomConfig.floor,
+                                                    color: preset.color,
+                                                    color2: preset.color2
+                                                }
+                                            });
+                                        }}
+                                        style={{
+                                            aspectRatio: '1',
+                                            borderRadius: '8px',
+                                            border: '1px solid rgba(0,0,0,0.1)',
+                                            background: `linear-gradient(135deg, ${preset.color} 0%, ${preset.color2} 100%)`,
+                                            cursor: 'pointer',
+                                            transition: 'all 0.15s ease'
+                                        }}
+                                        title={preset.name}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = 'scale(1.05)';
+                                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = 'scale(1)';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Wall Visibility Toggle */}
+                        <div>
+                            <label style={{
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: '#1A202C',
+                                marginBottom: 8,
+                                display: 'block'
+                            }}>
+                                Wall Visibility
+                            </label>
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 8
+                            }}>
+                                {[
+                                    { key: 'leftWall', label: 'Left Wall' },
+                                    { key: 'rightWall', label: 'Right Wall' },
+                                    { key: 'backWall', label: 'Back Wall' }
+                                ].map(({ key, label }) => (
+                                    <label
+                                        key={key}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            fontSize: 11,
+                                            color: '#1A202C',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <span>{label}</span>
+                                        <input
+                                            type="checkbox"
+                                            checked={roomConfig[key]?.visible !== false}
+                                            onChange={(e) => {
+                                                updateRoomConfig({
+                                                    [key]: {
+                                                        ...roomConfig[key],
+                                                        visible: e.target.checked
+                                                    }
+                                                });
+                                            }}
+                                            style={{
+                                                cursor: 'pointer'
+                                            }}
+                                        />
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -401,7 +738,7 @@ const UIOverlay = () => {
             </div>
 
             {/* Leva Panel (Properties) - only in edit mode when object selected */}
-            {isEditMode && selectedId && (
+            {isEditMode && selectedId && !customizeOpen && (
                 <div style={{ 
                     position: 'absolute', 
                     top: 52, 

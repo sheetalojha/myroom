@@ -1,7 +1,7 @@
 import React from 'react';
 
 export const Rug = ({ color = '#e0f7fa' }) => (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
         <circleGeometry args={[1.5, 64]} />
         <meshStandardMaterial color={color} />
     </mesh>
@@ -10,7 +10,7 @@ export const Rug = ({ color = '#e0f7fa' }) => (
 export const WallArt = ({ color = '#ffcc80' }) => (
     <group>
         {/* Frame */}
-        <mesh position={[0, 1.5, -0.05]} castShadow receiveShadow>
+        <mesh position={[0, 1.5, -0.05]}>
             <boxGeometry args={[1, 1.2, 0.05]} />
             <meshStandardMaterial color="#5d4037" />
         </mesh>
@@ -24,7 +24,7 @@ export const WallArt = ({ color = '#ffcc80' }) => (
 
 export const Mirror = () => (
     <group>
-        <mesh position={[0, 1.5, -0.05]} castShadow receiveShadow>
+        <mesh position={[0, 1.5, -0.05]}>
             <cylinderGeometry args={[0.6, 0.6, 0.05, 64]} rotation={[Math.PI / 2, 0, 0]} />
             <meshStandardMaterial color="#silver" metalness={1} roughness={0} />
         </mesh>
@@ -38,7 +38,7 @@ export const Mirror = () => (
 export const Plant = ({ color = '#4caf50' }) => (
     <group>
         {/* Pot */}
-        <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
+        <mesh position={[0, 0.2, 0]}>
             <cylinderGeometry args={[0.25, 0.2, 0.4]} />
             <meshStandardMaterial color="#ff7043" />
         </mesh>
@@ -48,12 +48,12 @@ export const Plant = ({ color = '#4caf50' }) => (
             <meshStandardMaterial color="#3e2723" />
         </mesh>
         {/* Stem */}
-        <mesh position={[0, 0.6, 0]} castShadow receiveShadow>
+        <mesh position={[0, 0.6, 0]}>
             <cylinderGeometry args={[0.02, 0.02, 0.5]} />
             <meshStandardMaterial color="#388e3c" />
         </mesh>
         {/* Leaves */}
-        <mesh position={[0, 0.8, 0]} castShadow receiveShadow>
+        <mesh position={[0, 0.8, 0]}>
             <dodecahedronGeometry args={[0.3]} />
             <meshStandardMaterial color={color} />
         </mesh>

@@ -11,17 +11,17 @@ export const Lamp = ({ color = '#ffeb3b', data = {}, onUpdate }) => {
     return (
         <group onClick={toggle}>
             {/* Base */}
-            <mesh position={[0, 0.05, 0]} castShadow receiveShadow>
+            <mesh position={[0, 0.05, 0]}>
                 <cylinderGeometry args={[0.2, 0.25, 0.1]} />
                 <meshStandardMaterial color="#212121" />
             </mesh>
             {/* Pole */}
-            <mesh position={[0, 0.55, 0]} castShadow receiveShadow>
+            <mesh position={[0, 0.55, 0]}>
                 <cylinderGeometry args={[0.02, 0.02, 1]} />
                 <meshStandardMaterial color="#212121" />
             </mesh>
             {/* Shade */}
-            <mesh position={[0, 1.1, 0]} castShadow receiveShadow>
+            <mesh position={[0, 1.1, 0]}>
                 <coneGeometry args={[0.3, 0.4, 32, 1, true]} />
                 <meshStandardMaterial color={color} side={2} transparent opacity={0.9} />
             </mesh>
@@ -31,7 +31,7 @@ export const Lamp = ({ color = '#ffeb3b', data = {}, onUpdate }) => {
                 <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={isOn ? 2 : 0} />
             </mesh>
             {isOn && (
-                <pointLight position={[0, 0.9, 0]} intensity={1} distance={5} color="#ffaa00" castShadow />
+                <pointLight position={[0, 0.9, 0]} intensity={1} distance={5} color="#ffaa00" />
             )}
         </group>
     );
