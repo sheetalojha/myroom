@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { TransformControls } from '@react-three/drei';
 import useStore from '../store/useStore';
 import { Registry } from './library/Registry';
@@ -9,7 +9,7 @@ const EditorObject = ({ id, type, position, rotation, scale, color, data }) => {
     const updateObject = useStore((state) => state.updateObject);
 
     const isSelected = selectedId === id;
-    const meshRef = useRef();
+    const groupRef = useRef();
 
     const handleClick = (e) => {
         e.stopPropagation();
@@ -17,8 +17,8 @@ const EditorObject = ({ id, type, position, rotation, scale, color, data }) => {
     };
 
     const handleTransformChange = () => {
-        if (meshRef.current) {
-            const { position, rotation, scale } = meshRef.current;
+        if (groupRef.current) {
+            const { position, rotation, scale } = groupRef.current;
             updateObject(id, {
                 position: [position.x, position.y, position.z],
                 rotation: [rotation.x, rotation.y, rotation.z],
@@ -27,9 +27,23 @@ const EditorObject = ({ id, type, position, rotation, scale, color, data }) => {
         }
     };
 
+    const handleObjectChange = () => {
+        // Update on every change for real-time boundary clamping
+        handleTransformChange();
+    };
+
     const handleUpdate = (props) => {
         updateObject(id, props);
     };
+
+    // Sync group position with store position
+    useEffect(() => {
+        if (groupRef.current) {
+            groupRef.current.position.set(...position);
+            groupRef.current.rotation.set(...rotation);
+            groupRef.current.scale.set(...scale);
+        }
+    }, [position, rotation, scale]);
 
     const registryItem = Registry[type];
     const Component = registryItem ? registryItem.component : null;
@@ -38,13 +52,14 @@ const EditorObject = ({ id, type, position, rotation, scale, color, data }) => {
         <>
             {isSelected && (
                 <TransformControls
-                    object={meshRef}
+                    object={groupRef}
                     mode="translate"
+                    onChange={handleObjectChange}
                     onMouseUp={handleTransformChange}
                 />
             )}
             <group
-                ref={meshRef}
+                ref={groupRef}
                 position={position}
                 rotation={rotation}
                 scale={scale}
