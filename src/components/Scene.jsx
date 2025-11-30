@@ -6,19 +6,21 @@ import useStore from '../store/useStore';
 import Room from './Room';
 import EditorObject from './EditorObject';
 
-// Helper component to expose the scene globally for export functionality
+// Helper component to expose the scene and camera globally for export functionality
 const SceneExporter = () => {
-    const { scene } = useThree();
+    const { scene, camera } = useThree();
 
     useEffect(() => {
-        // Store scene reference globally for object export
+        // Store scene and camera references globally for export functionality
         window.__THREE_SCENE__ = scene;
+        window.__THREE_CAMERA__ = camera;
 
         return () => {
             // Cleanup on unmount
             delete window.__THREE_SCENE__;
+            delete window.__THREE_CAMERA__;
         };
-    }, [scene]);
+    }, [scene, camera]);
 
     return null;
 };
@@ -30,6 +32,7 @@ const Scene = () => {
 
     return (
         <Canvas shadows camera={{ position: [8, 8, 8], fov: 45 }}>
+            <SceneExporter />
             {/* Lighting & Environment */}
             <ambientLight intensity={0.4} />
             <directionalLight

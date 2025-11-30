@@ -81,14 +81,28 @@ export async function exportObjectToGLB(object) {
 export async function generateThumbnail(scene, camera, width = 512, height = 512) {
     return new Promise((resolve, reject) => {
         try {
-            // Create offscreen renderer
+            // Validate inputs
+            if (!scene || !camera) {
+                reject(new Error('Scene and camera must be provided'));
+                return;
+            }
+
+            // Update camera matrix before rendering
+            camera.updateMatrixWorld();
+
+            // Create offscreen renderer with shadows enabled
             const renderer = new THREE.WebGLRenderer({
                 antialias: true,
                 alpha: true,
                 preserveDrawingBuffer: true
             });
             renderer.setSize(width, height);
-            renderer.setClearColor(0x000000, 0);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.setClearColor(0x202020, 1); // Match the scene background color
+
+            // Update scene matrices
+            scene.updateMatrixWorld();
 
             // Render the scene
             renderer.render(scene, camera);
@@ -96,8 +110,12 @@ export async function generateThumbnail(scene, camera, width = 512, height = 512
             // Get canvas and convert to blob
             renderer.domElement.toBlob((blob) => {
                 renderer.dispose();
-                resolve(blob);
-            }, 'image/png');
+                if (blob) {
+                    resolve(blob);
+                } else {
+                    reject(new Error('Failed to generate thumbnail blob'));
+                }
+            }, 'image/png', 0.95); // High quality PNG
         } catch (error) {
             reject(error);
         }
@@ -112,6 +130,67 @@ export async function generateThumbnail(scene, camera, width = 512, height = 512
  */
 export function arrayBufferToBlob(buffer, mimeType = 'model/gltf-binary') {
     return new Blob([buffer], { type: mimeType });
+}
+
+/**
+ * Generate a thumbnail from the current scene
+ * Uses the scene and camera exposed globally by the Scene component
+ * @param {Object} options - Thumbnail options
+ * @param {number} options.width - Thumbnail width (default: 1024)
+ * @param {number} options.height - Thumbnail height (default: 1024)
+ * @param {boolean} options.useCurrentCamera - Use current camera position or default angle (default: false)
+ * @returns {Promise<Blob>} Thumbnail as PNG blob
+ */
+export async function generateSceneThumbnail(options = {}) {
+    const {
+        width = 1024,
+        height = 1024,
+        useCurrentCamera = false
+    } = options;
+
+    // Get scene from global reference
+    if (!window.__THREE_SCENE__) {
+        throw new Error('Three.js scene not available. Make sure the scene is rendered.');
+    }
+
+    const scene = window.__THREE_SCENE__;
+    let camera;
+
+    if (useCurrentCamera && window.__THREE_CAMERA__) {
+        // Use the current camera from the scene
+        const originalCamera = window.__THREE_CAMERA__;
+        camera = new THREE.PerspectiveCamera(
+            originalCamera.fov,
+            width / height,
+            originalCamera.near,
+            originalCamera.far
+        );
+        camera.position.copy(originalCamera.position);
+        camera.rotation.copy(originalCamera.rotation);
+        camera.quaternion.copy(originalCamera.quaternion);
+    } else {
+        // Create a new camera with a good default viewing angle
+        // Similar to the default camera position in Scene.jsx: [8, 8, 8]
+        camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        camera.position.set(8, 8, 8);
+        camera.lookAt(0, 0, 0);
+    }
+
+    // Instead of cloning, we'll use the scene directly but ensure it's updated
+    // Cloning can cause issues with React Three Fiber's internal structure
+    // We'll render synchronously so it shouldn't affect the main render
+    
+    // Update the scene's matrix world to ensure everything is in the right place
+    scene.updateMatrixWorld(true);
+
+    // Generate thumbnail using the original scene
+    // Since we're rendering offscreen, this shouldn't interfere with the main render
+    const thumbnailBlob = await generateThumbnail(scene, camera, width, height);
+
+    // Note: We're using the original scene, so no cleanup needed
+    // The camera will be garbage collected automatically
+
+    return thumbnailBlob;
 }
 
 /**

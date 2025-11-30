@@ -6,7 +6,7 @@ import blockchainService from '../services/blockchainService';
 import lighthouseService from '../services/lighthouseService';
 import { generateObjectMetadata, generateSceneMetadata } from '../utils/metadataUtils';
 import { serializeScene } from '../utils/sceneSerializer';
-import { exportObjectToGLB, arrayBufferToBlob } from '../utils/glbExporter';
+import { exportObjectToGLB, arrayBufferToBlob, generateSceneThumbnail } from '../utils/glbExporter';
 import { exportObjectDataToGLB } from '../utils/objectExporter';
 import useStore from '../store/useStore';
 
@@ -117,10 +117,13 @@ const PublishPanel = () => {
             console.log(sceneData);
             const sceneCID = await lighthouseService.uploadJSON(sceneData, 'scene.json');
 
-            // Upload Thumbnail (mock for now)
-            const mockThumbnail = new Blob(['mock thumbnail'], { type: 'image/png' });
-            const thumbnailFile = new File([mockThumbnail], 'thumbnail.png', { type: 'image/png' });
-            const thumbnailCID = await lighthouseService.uploadFile(thumbnailFile);
+            // Generate and upload thumbnail
+            setPublishStatus({ status: 'uploading', message: 'Generating scene thumbnail...' });
+            const thumbnailBlob = await generateSceneThumbnail({ width: 1024, height: 1024 });
+            const thumbnailFile = new File([thumbnailBlob], 'thumbnail.png', { type: 'image/png' });
+            const thumbnailCID = await lighthouseService.uploadFile(thumbnailFile, (progress) => {
+                setPublishStatus({ status: 'uploading', message: `Uploading thumbnail: ${progress}%` });
+            });
 
             // Upload Metadata
             // Upload Metadata
