@@ -39,6 +39,15 @@ const useStore = create((set, get) => ({
   selectedId: null,
   gridEnabled: true, // Enable grid snapping by default
   mode: 'edit', // 'edit' or 'view'
+  // Performance settings
+  performanceMode: 'high', // 'high', 'medium', 'low'
+  shadowQuality: 2048, // Shadow map size
+  enableShadows: true, // Enable shadows
+  ssaoSamples: 16, // SSAO sample count
+  ssaoRadius: 6, // SSAO radius
+  ssaoIntensity: 30, // SSAO intensity
+  bloomIntensity: 0.3, // Bloom intensity
+  enablePostProcessing: true, // Enable post-processing effects
 
   addObject: (type) => {
     const id = uuidv4();
@@ -106,6 +115,51 @@ const useStore = create((set, get) => ({
 
   setMode: (mode) => {
     set({ mode });
+  },
+
+  // Performance state for UI
+  performanceNotification: null, // { show: boolean, message: string, isCritical: boolean }
+
+  setPerformanceNotification: (notification) => {
+    set({ performanceNotification: notification });
+  },
+
+  // Performance adjustment functions
+  adjustPerformanceSettings: (level) => {
+    if (level === 'low') {
+      set({
+        performanceMode: 'low',
+        shadowQuality: 1024,
+        enableShadows: false, // Disable shadows for low performance
+        ssaoSamples: 8,
+        ssaoRadius: 4,
+        ssaoIntensity: 20,
+        bloomIntensity: 0.2,
+        enablePostProcessing: true, // Keep enabled but reduced
+      });
+    } else if (level === 'medium') {
+      set({
+        performanceMode: 'medium',
+        shadowQuality: 1536,
+        enableShadows: true, // Keep shadows enabled for medium
+        ssaoSamples: 12,
+        ssaoRadius: 5,
+        ssaoIntensity: 25,
+        bloomIntensity: 0.25,
+        enablePostProcessing: true,
+      });
+    } else {
+      set({
+        performanceMode: 'high',
+        shadowQuality: 2048,
+        enableShadows: true, // Full shadows for high performance
+        ssaoSamples: 16,
+        ssaoRadius: 6,
+        ssaoIntensity: 30,
+        bloomIntensity: 0.3,
+        enablePostProcessing: true,
+      });
+    }
   },
 }));
 

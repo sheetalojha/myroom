@@ -1,25 +1,27 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo, useCallback } from 'react';
 import { TransformControls } from '@react-three/drei';
 import useStore from '../store/useStore';
 import { Registry } from './library/Registry';
 
-const EditorObject = ({ id, type, position, rotation, scale, color, data }) => {
+const EditorObject = React.memo(({ id, type, position, rotation, scale, color, data }) => {
+    // Optimize store subscriptions - only subscribe to what this component needs
     const selectedId = useStore((state) => state.selectedId);
     const selectObject = useStore((state) => state.selectObject);
     const updateObject = useStore((state) => state.updateObject);
     const mode = useStore((state) => state.mode);
+    
     const isEditMode = mode === 'edit';
-
     const isSelected = selectedId === id;
     const groupRef = useRef();
+    const updateTimeoutRef = useRef(null);
 
-    const handleClick = (e) => {
+    const handleClick = useCallback((e) => {
         if (!isEditMode) return;
         e.stopPropagation();
         selectObject(id);
-    };
+    }, [isEditMode, selectObject, id]);
 
-    const handleTransformChange = () => {
+    const handleTransformChange = useCallback(() => {
         if (groupRef.current) {
             const { position, rotation, scale } = groupRef.current;
             updateObject(id, {
@@ -28,16 +30,22 @@ const EditorObject = ({ id, type, position, rotation, scale, color, data }) => {
                 scale: [scale.x, scale.y, scale.z],
             });
         }
-    };
+    }, [id, updateObject]);
 
-    const handleObjectChange = () => {
-        // Update on every change for real-time boundary clamping
-        handleTransformChange();
-    };
+    // CRITICAL FIX: Debounce onChange to prevent expensive updates on every frame
+    // Only update on mouseUp, not during dragging
+    const handleObjectChange = useCallback(() => {
+        // Clear any pending updates
+        if (updateTimeoutRef.current) {
+            clearTimeout(updateTimeoutRef.current);
+        }
+        // Don't update during drag - only visual feedback
+        // The onMouseUp handler will do the final update
+    }, []);
 
-    const handleUpdate = (props) => {
+    const handleUpdate = useCallback((props) => {
         updateObject(id, props);
-    };
+    }, [id, updateObject]);
 
     // Sync group position with store position
     useEffect(() => {
@@ -48,7 +56,8 @@ const EditorObject = ({ id, type, position, rotation, scale, color, data }) => {
         }
     }, [position, rotation, scale]);
 
-    const registryItem = Registry[type];
+    // Memoize registry lookup
+    const registryItem = useMemo(() => Registry[type], [type]);
     const Component = registryItem ? registryItem.component : null;
 
     return (
@@ -80,6 +89,8 @@ const EditorObject = ({ id, type, position, rotation, scale, color, data }) => {
             </group>
         </>
     );
-};
+});
+
+EditorObject.displayName = 'EditorObject';
 
 export default EditorObject;

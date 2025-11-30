@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import useStore from '../store/useStore';
 import { Leva } from 'leva';
 import { Registry, Categories } from './library/Registry';
+import PerformanceNotification from './PerformanceNotification';
 import {
     Armchair,
     Lamp,
@@ -30,6 +31,8 @@ const UIOverlay = () => {
     const mode = useStore((state) => state.mode);
     const setMode = useStore((state) => state.setMode);
     const selectedId = useStore((state) => state.selectedId);
+    const performanceNotification = useStore((state) => state.performanceNotification);
+    const setPerformanceNotification = useStore((state) => state.setPerformanceNotification);
 
     const [activeCategory, setActiveCategory] = useState('Furniture');
     const [libraryOpen, setLibraryOpen] = useState(true);
@@ -431,6 +434,16 @@ const UIOverlay = () => {
                         }} 
                     />
                 </div>
+            )}
+
+            {/* Performance Notification */}
+            {performanceNotification && (
+                <PerformanceNotification
+                    show={performanceNotification.show}
+                    message={performanceNotification.message}
+                    isCritical={performanceNotification.isCritical}
+                    onDismiss={() => setPerformanceNotification(null)}
+                />
             )}
 
             {/* Custom Scrollbar */}

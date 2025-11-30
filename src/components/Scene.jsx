@@ -5,6 +5,7 @@ import { EffectComposer, Bloom, SSAO } from '@react-three/postprocessing';
 import useStore from '../store/useStore';
 import Room from './Room';
 import EditorObject from './EditorObject';
+import { usePerformanceMonitor } from '../hooks/usePerformanceMonitor';
 import * as THREE from 'three';
 
 // True isometric camera configuration
@@ -62,14 +63,19 @@ const IsometricOrbitControls = ({ enabled }) => {
     const controlsRef = useRef();
     const isDragging = useRef(false);
     const springFactor = 0.15;
+    const frameCount = useRef(0);
     
     useFrame(() => {
-        if (!controlsRef.current) return;
+        if (!controlsRef.current || !enabled) return;
+        
+        // Skip every other frame for better performance
+        frameCount.current++;
+        if (frameCount.current % 2 !== 0 && !isDragging.current) return;
         
         const controls = controlsRef.current;
         
-        // If not dragging and enabled, smoothly return to isometric view
-        if (!isDragging.current && enabled) {
+        // If not dragging, smoothly return to isometric view
+        if (!isDragging.current) {
             const currentAzimuth = controls.getAzimuthalAngle();
             const currentPolar = controls.getPolarAngle();
             
@@ -136,7 +142,9 @@ const IsometricOrbitControls = ({ enabled }) => {
 };
 
 // Shadow Catcher Plane for drop shadow - positioned below the room
-const ShadowCatcher = () => {
+const ShadowCatcher = ({ enabled }) => {
+    if (!enabled) return null;
+    
     return (
         <mesh
             rotation={[-Math.PI / 2, 0, 0]}
@@ -149,19 +157,72 @@ const ShadowCatcher = () => {
     );
 };
 
+// Performance Monitor Component (inside Canvas)
+const PerformanceMonitor = () => {
+    const performanceState = usePerformanceMonitor();
+    const adjustPerformanceSettings = useStore((state) => state.adjustPerformanceSettings);
+    const setPerformanceNotification = useStore((state) => state.setPerformanceNotification);
+    
+    const previousPerformanceState = useRef({ isCritical: false, isLowPerformance: false });
+
+    useEffect(() => {
+        const wasLowPerformance = previousPerformanceState.current.isLowPerformance || previousPerformanceState.current.isCritical;
+        const isNowLowPerformance = performanceState.isLowPerformance || performanceState.isCritical;
+
+        // Only adjust settings when transitioning TO low performance
+        if (isNowLowPerformance && !wasLowPerformance) {
+            if (performanceState.isCritical) {
+                adjustPerformanceSettings('low');
+            } else if (performanceState.isLowPerformance) {
+                adjustPerformanceSettings('medium');
+            }
+        }
+
+        // Update notification in store for UI - only show when transitioning
+        if (performanceState.showNotification) {
+            setPerformanceNotification({
+                show: true,
+                message: performanceState.notificationMessage,
+                isCritical: performanceState.isCritical
+            });
+        } else {
+            setPerformanceNotification(null);
+        }
+
+        // Update previous state
+        previousPerformanceState.current = {
+            isCritical: performanceState.isCritical,
+            isLowPerformance: performanceState.isLowPerformance
+        };
+    }, [performanceState, adjustPerformanceSettings, setPerformanceNotification]);
+
+    return null;
+};
+
 const Scene = () => {
     const objects = useStore((state) => state.objects);
     const selectedId = useStore((state) => state.selectedId);
     const selectObject = useStore((state) => state.selectObject);
     const mode = useStore((state) => state.mode);
+    const shadowQuality = useStore((state) => state.shadowQuality);
+    const enableShadows = useStore((state) => state.enableShadows);
+    const ssaoSamples = useStore((state) => state.ssaoSamples);
+    const ssaoRadius = useStore((state) => state.ssaoRadius);
+    const ssaoIntensity = useStore((state) => state.ssaoIntensity);
+    const bloomIntensity = useStore((state) => state.bloomIntensity);
+    const enablePostProcessing = useStore((state) => state.enablePostProcessing);
     const isEditMode = mode === 'edit';
 
     return (
         <Canvas 
-            shadows 
+            shadows={enableShadows}
             gl={{ antialias: true, alpha: true }}
-            dpr={[1, 2]}
+            dpr={1}
+            performance={{ min: 0.5 }}
         >
+            {/* Performance Monitor */}
+            <PerformanceMonitor />
+
             {/* Setup orthographic camera */}
             <OrthographicCamera />
 
@@ -173,8 +234,8 @@ const Scene = () => {
                 position={[15, 20, 10]}
                 intensity={1.5}
                 color="#FFFFFF"
-                castShadow
-                shadow-mapSize={[4096, 4096]}
+                castShadow={enableShadows}
+                shadow-mapSize={enableShadows ? [shadowQuality, shadowQuality] : [512, 512]}
                 shadow-camera-far={60}
                 shadow-camera-left={-20}
                 shadow-camera-right={20}
@@ -191,24 +252,29 @@ const Scene = () => {
                 color="#FFFFFF"
             />
 
-            {/* Post Processing Effects */}
-            <EffectComposer>
-                <SSAO
-                    samples={31}
-                    radius={8}
-                    intensity={40}
-                    luminanceInfluence={0.1}
-                    color="#000000"
-                />
-                <Bloom
-                    luminanceThreshold={0.9}
-                    intensity={0.4}
-                    radius={0.5}
-                />
-            </EffectComposer>
+            {/* Post Processing Effects - Dynamically adjusted for performance */}
+            {enablePostProcessing && (
+                <EffectComposer>
+                    {/* SSAO only works well with shadows enabled */}
+                    {enableShadows && (
+                        <SSAO
+                            samples={ssaoSamples}
+                            radius={ssaoRadius}
+                            intensity={ssaoIntensity}
+                            luminanceInfluence={0.1}
+                            color="#000000"
+                        />
+                    )}
+                    <Bloom
+                        luminanceThreshold={0.95}
+                        intensity={bloomIntensity}
+                        radius={0.4}
+                    />
+                </EffectComposer>
+            )}
 
             {/* Shadow catcher for drop shadow */}
-            <ShadowCatcher />
+            <ShadowCatcher enabled={enableShadows} />
 
             <Room />
 
