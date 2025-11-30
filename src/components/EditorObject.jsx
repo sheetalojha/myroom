@@ -9,11 +9,18 @@ const EditorObject = React.memo(({ id, type, position, rotation, scale, color, d
     const selectObject = useStore((state) => state.selectObject);
     const updateObject = useStore((state) => state.updateObject);
     const mode = useStore((state) => state.mode);
-    
+
     const isEditMode = mode === 'edit';
     const isSelected = selectedId === id;
     const groupRef = useRef();
     const updateTimeoutRef = useRef(null);
+
+    // Store object ID in userData for export functionality
+    useEffect(() => {
+        if (groupRef.current) {
+            groupRef.current.userData.objectId = id;
+        }
+    }, [id, groupRef]);
 
     const handleClick = useCallback((e) => {
         if (!isEditMode) return;

@@ -3,6 +3,9 @@ import useStore from '../store/useStore';
 import { Leva } from 'leva';
 import { Registry, Categories } from './library/Registry';
 import PerformanceNotification from './PerformanceNotification';
+import WalletConnect from './WalletConnect';
+import PublishPanel from './PublishPanel';
+import NFTLibrary from './NFTLibrary';
 import { COLOR_THEMES, LIGHTING_PRESETS, WALL_COLOR_PRESETS, FLOOR_COLOR_PRESETS } from '../config/roomThemes';
 import {
     Armchair,
@@ -17,7 +20,8 @@ import {
     Edit3,
     Eye,
     Palette,
-    Settings
+    Settings,
+    Package
 } from 'lucide-react';
 
 const CategoryIcons = {
@@ -40,12 +44,13 @@ const UIOverlay = () => {
     const [activeCategory, setActiveCategory] = useState('Furniture');
     const [libraryOpen, setLibraryOpen] = useState(true);
     const [customizeOpen, setCustomizeOpen] = useState(false);
-    
+    const [showNFTLibrary, setShowNFTLibrary] = useState(false);
+
     const roomConfig = useStore((state) => state.roomConfig);
     const setColorTheme = useStore((state) => state.setColorTheme);
     const setLighting = useStore((state) => state.setLighting);
     const updateRoomConfig = useStore((state) => state.updateRoomConfig);
-    
+
     const isEditMode = mode === 'edit';
 
     const handleSave = () => {
@@ -75,16 +80,16 @@ const UIOverlay = () => {
     };
 
     const filteredItems = Object.entries(Registry).filter(
-        ([key, item]) => item.category === activeCategory
+        ([, item]) => item.category === activeCategory
     );
 
     return (
-        <div style={{ 
-            position: 'absolute', 
-            top: 0, 
-            left: 0, 
-            width: '100%', 
-            height: '100%', 
+        <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
             pointerEvents: 'none',
             fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
         }}>
@@ -229,6 +234,9 @@ const UIOverlay = () => {
                         </button>
                     </>
                 )}
+
+                {/* Wallet Connect - In Navbar */}
+                <WalletConnect />
             </div>
 
             {/* Top Right - Floating Save/Load Buttons - only in edit mode */}
@@ -242,7 +250,7 @@ const UIOverlay = () => {
                     pointerEvents: 'auto',
                     zIndex: 100
                 }}>
-                    <button 
+                    <button
                         onClick={handleSave}
                         style={{
                             background: 'rgba(255, 255, 255, 0.95)',
@@ -269,7 +277,7 @@ const UIOverlay = () => {
                     >
                         <Save size={12} /> Save
                     </button>
-                    <label 
+                    <label
                         style={{
                             background: 'rgba(255, 255, 255, 0.95)',
                             backdropFilter: 'blur(16px)',
@@ -296,6 +304,54 @@ const UIOverlay = () => {
                         <Upload size={12} /> Load
                         <input type="file" accept=".json" onChange={handleLoad} style={{ display: 'none' }} />
                     </label>
+                </div>
+            )}
+
+            {/* Bottom Horizontal Section - Publish Panel & My Rooms - only in edit mode */}
+            {isEditMode && (
+                <div style={{
+                    position: 'absolute',
+                    bottom: 24,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    pointerEvents: 'auto',
+                    zIndex: 100
+                }}>
+                    <PublishPanel />
+                    <button
+                        onClick={() => setShowNFTLibrary(true)}
+                        style={{
+                            background: 'rgba(255, 255, 255, 0.95)',
+                            backdropFilter: 'blur(16px)',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                            padding: '8px 14px',
+                            borderRadius: '20px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            fontSize: 11,
+                            fontWeight: 500,
+                            color: '#1A202C',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                            transition: 'all 0.15s ease',
+                            whiteSpace: 'nowrap'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                    >
+                        <Package size={12} />
+                        My Rooms
+                    </button>
                 </div>
             )}
 
@@ -367,11 +423,11 @@ const UIOverlay = () => {
                                         style={{
                                             padding: '10px 12px',
                                             borderRadius: '8px',
-                                            border: roomConfig.colorTheme === key 
-                                                ? '2px solid #1A202C' 
+                                            border: roomConfig.colorTheme === key
+                                                ? '2px solid #1A202C'
                                                 : '1px solid rgba(0,0,0,0.1)',
-                                            background: roomConfig.colorTheme === key 
-                                                ? '#1A202C' 
+                                            background: roomConfig.colorTheme === key
+                                                ? '#1A202C'
                                                 : 'rgba(0,0,0,0.02)',
                                             color: roomConfig.colorTheme === key ? '#FFFFFF' : '#1A202C',
                                             cursor: 'pointer',
@@ -410,11 +466,11 @@ const UIOverlay = () => {
                                         style={{
                                             padding: '8px 12px',
                                             borderRadius: '8px',
-                                            border: roomConfig.lighting === key 
-                                                ? '2px solid #1A202C' 
+                                            border: roomConfig.lighting === key
+                                                ? '2px solid #1A202C'
                                                 : '1px solid rgba(0,0,0,0.1)',
-                                            background: roomConfig.lighting === key 
-                                                ? '#1A202C' 
+                                            background: roomConfig.lighting === key
+                                                ? '#1A202C'
                                                 : 'rgba(0,0,0,0.02)',
                                             color: roomConfig.lighting === key ? '#FFFFFF' : '#1A202C',
                                             cursor: 'pointer',
@@ -615,10 +671,10 @@ const UIOverlay = () => {
                     border: '1px solid rgba(255, 255, 255, 0.3)'
                 }}>
                     {/* Categories - Minimal */}
-                    <div style={{ 
-                        display: 'flex', 
-                        gap: 4, 
-                        padding: '12px', 
+                    <div style={{
+                        display: 'flex',
+                        gap: 4,
+                        padding: '12px',
                         overflowX: 'auto',
                         borderBottom: '1px solid rgba(0,0,0,0.06)'
                     }}>
@@ -633,7 +689,7 @@ const UIOverlay = () => {
                                         padding: '8px 12px',
                                         borderRadius: '8px',
                                         border: 'none',
-                                        background: isActive 
+                                        background: isActive
                                             ? '#1A202C'
                                             : 'transparent',
                                         color: isActive ? '#FFFFFF' : '#1A202C',
@@ -690,7 +746,7 @@ const UIOverlay = () => {
                                     e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)';
                                 }}
                             >
-                                <div style={{ 
+                                <div style={{
                                     marginBottom: 8,
                                     color: '#1A202C',
                                     display: 'flex',
@@ -699,9 +755,9 @@ const UIOverlay = () => {
                                 }}>
                                     <Box size={32} strokeWidth={1.5} />
                                 </div>
-                                <span style={{ 
-                                    fontSize: 11, 
-                                    textAlign: 'center', 
+                                <span style={{
+                                    fontSize: 11,
+                                    textAlign: 'center',
                                     color: '#1A202C',
                                     fontWeight: 500
                                 }}>
@@ -739,17 +795,17 @@ const UIOverlay = () => {
 
             {/* Leva Panel (Properties) - only in edit mode when object selected */}
             {isEditMode && selectedId && !customizeOpen && (
-                <div style={{ 
-                    position: 'absolute', 
-                    top: 52, 
-                    right: 16, 
+                <div style={{
+                    position: 'absolute',
+                    top: 52,
+                    right: 16,
                     pointerEvents: 'auto',
                     zIndex: 50
                 }}>
-                    <Leva 
-                        fill 
-                        flat 
-                        titleBar={false} 
+                    <Leva
+                        fill
+                        flat
+                        titleBar={false}
                         theme={{
                             colors: {
                                 elevation1: 'rgba(255, 255, 255, 0.98)',
@@ -768,10 +824,13 @@ const UIOverlay = () => {
                                 sm: '6px',
                                 lg: '8px',
                             },
-                        }} 
+                        }}
                     />
                 </div>
             )}
+
+            {/* NFT Library Modal */}
+            <NFTLibrary isOpen={showNFTLibrary} onClose={() => setShowNFTLibrary(false)} />
 
             {/* Performance Notification */}
             {performanceNotification && (
@@ -783,7 +842,7 @@ const UIOverlay = () => {
                 />
             )}
 
-            {/* Custom Scrollbar */}
+            {/* Custom Scrollbar & Animations */}
             <style>{`
                 ::-webkit-scrollbar {
                     width: 8px;
@@ -799,6 +858,20 @@ const UIOverlay = () => {
                 }
                 ::-webkit-scrollbar-thumb:hover {
                     background: rgba(26, 32, 44, 0.5);
+                }
+                @keyframes slideIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
                 }
             `}</style>
         </div>

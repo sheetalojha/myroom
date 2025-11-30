@@ -205,6 +205,26 @@ const PerformanceMonitor = () => {
     return null;
 };
 
+// Helper component to expose the scene and camera globally for export functionality
+const SceneExporter = () => {
+    const { scene, camera } = useThree();
+
+    useEffect(() => {
+        // Store scene and camera references globally for export functionality
+        window.__THREE_SCENE__ = scene;
+        window.__THREE_CAMERA__ = camera;
+
+        return () => {
+            // Cleanup on unmount
+            delete window.__THREE_SCENE__;
+            delete window.__THREE_CAMERA__;
+        };
+    }, [scene, camera]);
+
+    return null;
+};
+
+
 const Scene = () => {
     const objects = useStore((state) => state.objects);
     const selectedId = useStore((state) => state.selectedId);
@@ -230,6 +250,7 @@ const Scene = () => {
         >
             {/* Performance Monitor */}
             <PerformanceMonitor />
+            <SceneExporter />
 
             {/* Setup orthographic camera */}
             <OrthographicCamera />
