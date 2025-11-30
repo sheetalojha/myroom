@@ -1,10 +1,27 @@
-import React from 'react';
-import { Canvas } from '@react-three/fiber';
+import React, { useEffect } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import useStore from '../store/useStore';
 import Room from './Room';
 import EditorObject from './EditorObject';
+
+// Helper component to expose the scene globally for export functionality
+const SceneExporter = () => {
+    const { scene } = useThree();
+
+    useEffect(() => {
+        // Store scene reference globally for object export
+        window.__THREE_SCENE__ = scene;
+
+        return () => {
+            // Cleanup on unmount
+            delete window.__THREE_SCENE__;
+        };
+    }, [scene]);
+
+    return null;
+};
 
 const Scene = () => {
     const objects = useStore((state) => state.objects);

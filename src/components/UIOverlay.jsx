@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import useStore from '../store/useStore';
 import { Leva } from 'leva';
 import { Registry, Categories } from './library/Registry';
+import WalletConnect from './WalletConnect';
+import PublishPanel from './PublishPanel';
+import NFTLibrary from './NFTLibrary';
 import {
     Armchair,
     Lamp,
@@ -10,7 +13,8 @@ import {
     Save,
     Upload,
     Trash2,
-    Box
+    Box,
+    Package
 } from 'lucide-react';
 
 const CategoryIcons = {
@@ -26,6 +30,7 @@ const UIOverlay = () => {
     const loadScene = useStore((state) => state.loadScene);
 
     const [activeCategory, setActiveCategory] = useState('Furniture');
+    const [showNFTLibrary, setShowNFTLibrary] = useState(false);
 
     const handleSave = () => {
         const data = JSON.stringify({ objects });
@@ -66,9 +71,15 @@ const UIOverlay = () => {
                 top: 20,
                 right: 20,
                 display: 'flex',
+                flexDirection: 'column',
                 gap: 10,
                 pointerEvents: 'auto'
             }}>
+                <WalletConnect />
+                <PublishPanel />
+                <button className="btn-secondary" onClick={() => setShowNFTLibrary(true)}>
+                    <Package size={16} /> My NFTs
+                </button>
                 <button className="btn-secondary" onClick={handleSave}>
                     <Save size={16} /> Save
                 </button>
@@ -192,6 +203,9 @@ const UIOverlay = () => {
                     },
                 }} />
             </div>
+
+            {/* NFT Library Modal */}
+            <NFTLibrary isOpen={showNFTLibrary} onClose={() => setShowNFTLibrary(false)} />
 
             <style>{`
         .btn-secondary {

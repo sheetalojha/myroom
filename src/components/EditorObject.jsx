@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { TransformControls } from '@react-three/drei';
 import useStore from '../store/useStore';
 import { Registry } from './library/Registry';
@@ -10,6 +10,13 @@ const EditorObject = ({ id, type, position, rotation, scale, color, data }) => {
 
     const isSelected = selectedId === id;
     const meshRef = useRef();
+
+    // Store object ID in userData for export functionality
+    useEffect(() => {
+        if (meshRef.current) {
+            meshRef.current.userData.objectId = id;
+        }
+    }, [id]);
 
     const handleClick = (e) => {
         e.stopPropagation();
