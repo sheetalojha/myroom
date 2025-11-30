@@ -7,11 +7,14 @@ const EditorObject = ({ id, type, position, rotation, scale, color, data }) => {
     const selectedId = useStore((state) => state.selectedId);
     const selectObject = useStore((state) => state.selectObject);
     const updateObject = useStore((state) => state.updateObject);
+    const mode = useStore((state) => state.mode);
+    const isEditMode = mode === 'edit';
 
     const isSelected = selectedId === id;
     const groupRef = useRef();
 
     const handleClick = (e) => {
+        if (!isEditMode) return;
         e.stopPropagation();
         selectObject(id);
     };
@@ -50,7 +53,7 @@ const EditorObject = ({ id, type, position, rotation, scale, color, data }) => {
 
     return (
         <>
-            {isSelected && (
+            {isEditMode && isSelected && (
                 <TransformControls
                     object={groupRef}
                     mode="translate"

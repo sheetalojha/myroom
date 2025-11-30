@@ -135,16 +135,16 @@ const IsometricOrbitControls = ({ enabled }) => {
     );
 };
 
-// Shadow Catcher Plane for drop shadow
+// Shadow Catcher Plane for drop shadow - positioned below the room
 const ShadowCatcher = () => {
     return (
         <mesh
             rotation={[-Math.PI / 2, 0, 0]}
-            position={[0, -0.5, 0]}
+            position={[0, -1, 0]}
             receiveShadow
         >
-            <planeGeometry args={[50, 50]} />
-            <shadowMaterial transparent opacity={0.3} />
+            <planeGeometry args={[60, 60]} />
+            <shadowMaterial transparent opacity={0.4} color="#000000" />
         </mesh>
     );
 };
@@ -153,57 +153,57 @@ const Scene = () => {
     const objects = useStore((state) => state.objects);
     const selectedId = useStore((state) => state.selectedId);
     const selectObject = useStore((state) => state.selectObject);
+    const mode = useStore((state) => state.mode);
+    const isEditMode = mode === 'edit';
 
     return (
         <Canvas 
             shadows 
             gl={{ antialias: true, alpha: true }}
             dpr={[1, 2]}
-            style={{ 
-                background: 'radial-gradient(circle at center, #E6F2FF 0%, #B3D9FF 50%, #87CEEB 100%)'
-            }}
         >
             {/* Setup orthographic camera */}
             <OrthographicCamera />
 
-            {/* Warm yellow-tinted sunlight */}
-            <ambientLight intensity={0.4} color="#FFF8E1" />
+            {/* Ambient light - subtle */}
+            <ambientLight intensity={0.3} color="#FFFFFF" />
             
-            {/* Main directional light - warm yellow tint */}
+            {/* Main directional light - from top-left like sun */}
             <directionalLight
-                position={[10, 15, 10]}
-                intensity={1.2}
-                color="#FFE082"
+                position={[15, 20, 10]}
+                intensity={1.5}
+                color="#FFFFFF"
                 castShadow
-                shadow-mapSize={[2048, 2048]}
-                shadow-camera-far={50}
-                shadow-camera-left={-15}
-                shadow-camera-right={15}
-                shadow-camera-top={15}
-                shadow-camera-bottom={-15}
+                shadow-mapSize={[4096, 4096]}
+                shadow-camera-far={60}
+                shadow-camera-left={-20}
+                shadow-camera-right={20}
+                shadow-camera-top={20}
+                shadow-camera-bottom={-20}
                 shadow-bias={-0.0001}
+                shadow-normalBias={0.02}
             />
             
-            {/* Fill light - warm tone */}
+            {/* Fill light from opposite side - subtle */}
             <directionalLight
-                position={[-8, 12, -8]}
-                intensity={0.4}
-                color="#FFF9C4"
+                position={[-10, 8, -10]}
+                intensity={0.2}
+                color="#FFFFFF"
             />
 
             {/* Post Processing Effects */}
             <EffectComposer>
                 <SSAO
                     samples={31}
-                    radius={5}
-                    intensity={30}
+                    radius={8}
+                    intensity={40}
                     luminanceInfluence={0.1}
                     color="#000000"
                 />
                 <Bloom
-                    luminanceThreshold={0.8}
-                    intensity={0.6}
-                    radius={0.7}
+                    luminanceThreshold={0.9}
+                    intensity={0.4}
+                    radius={0.5}
                 />
             </EffectComposer>
 
@@ -216,18 +216,20 @@ const Scene = () => {
                 <EditorObject key={obj.id} {...obj} />
             ))}
 
-            {/* Fixed isometric controls */}
-            <IsometricOrbitControls enabled={!selectedId} />
+            {/* Fixed isometric controls - disabled in view mode */}
+            <IsometricOrbitControls enabled={isEditMode && !selectedId} />
 
-            {/* Deselect on background click */}
-            <mesh
-                rotation={[-Math.PI / 2, 0, 0]}
-                position={[0, -0.01, 0]}
-                onClick={() => selectObject(null)}
-                visible={false}
-            >
-                <planeGeometry args={[100, 100]} />
-            </mesh>
+            {/* Deselect on background click - only in edit mode */}
+            {isEditMode && (
+                <mesh
+                    rotation={[-Math.PI / 2, 0, 0]}
+                    position={[0, -0.01, 0]}
+                    onClick={() => selectObject(null)}
+                    visible={false}
+                >
+                    <planeGeometry args={[100, 100]} />
+                </mesh>
+            )}
         </Canvas>
     );
 };

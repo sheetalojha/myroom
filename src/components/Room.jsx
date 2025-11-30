@@ -5,43 +5,49 @@ const ROOM_SIZE = 20;
 const WALL_HEIGHT = 10;
 const WALL_THICKNESS = 1.5; // Thick voxel-style walls
 const FLOOR_THICKNESS = 1.0; // Thick floor slab
-const VOXEL_SIZE = 0.5; // Size of each voxel block for stepped walls
+const VOXEL_SIZE = 1.0; // Size of each voxel block - chunkier blocks
 const GRID_DIVISIONS = 20; // 1x1 grid cells for coordinate placement
 
-// Create noise texture for walls
+// Create vertical noise texture for walls - continuous vertical pattern
 const createNoiseTexture = () => {
     const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 256;
+    canvas.width = 64;
+    canvas.height = 512; // Taller for vertical continuity
     const ctx = canvas.getContext('2d');
     
-    const imageData = ctx.createImageData(256, 256);
+    const imageData = ctx.createImageData(64, 512);
     const data = imageData.data;
     
-    for (let i = 0; i < data.length; i += 4) {
-        const noise = Math.random() * 0.1 + 0.95; // Subtle noise (0.95-1.05)
-        data[i] = 255 * noise;     // R
-        data[i + 1] = 255 * noise; // G
-        data[i + 2] = 255 * noise; // B
-        data[i + 3] = 255;         // A
+    // Create vertical noise pattern - continuous vertically
+    for (let y = 0; y < 512; y++) {
+        for (let x = 0; x < 64; x++) {
+            const index = (y * 64 + x) * 4;
+            const noise = Math.random() * 0.08 + 0.96; // Subtle noise (0.96-1.04)
+            data[index] = 255 * noise;     // R
+            data[index + 1] = 255 * noise; // G
+            data[index + 2] = 255 * noise; // B
+            data[index + 3] = 255;         // A
+        }
     }
     
     ctx.putImageData(imageData, 0, 0);
     const texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(4, 4);
+    texture.repeat.set(1, 1); // No repeating, use full texture
     return texture;
 };
 
-// Thick Floor Slab with Dark Chocolate Wood
+// Thick Floor Slab with Medium Oak/Chestnut Wood
 const ThickFloor = () => {
     const plankWidth = 1.0;
     // Extend floor to cover under walls
     const floorExtend = WALL_THICKNESS;
     const floorSize = ROOM_SIZE + floorExtend * 2;
     const planks = Math.ceil(floorSize / plankWidth);
-    const darkWoodColor = "#3E2723"; // Dark chocolate brown
+    // Medium oak/chestnut - reddish-orange-brown, more saturated
+    const woodColor1 = "#8B5A3C"; // Medium chestnut
+    const woodColor2 = "#A06647"; // Lighter chestnut
     
     return (
         <group>
@@ -54,8 +60,8 @@ const ThickFloor = () => {
             >
                 <boxGeometry args={[floorSize, floorSize, FLOOR_THICKNESS]} />
                 <meshStandardMaterial
-                    color="#2C1810"
-                    roughness={0.9}
+                    color="#7A4F35"
+                    roughness={0.85}
                     metalness={0.0}
                 />
             </mesh>
@@ -73,8 +79,8 @@ const ThickFloor = () => {
                     >
                         <planeGeometry args={[plankWidth - 0.02, floorSize]} />
                         <meshStandardMaterial
-                            color={i % 2 === 0 ? darkWoodColor : "#2E1F1A"}
-                            roughness={0.85}
+                            color={i % 2 === 0 ? woodColor1 : woodColor2}
+                            roughness={0.8}
                             metalness={0.0}
                         />
                     </mesh>
@@ -191,14 +197,14 @@ const FloorGrid = () => {
 };
 
 // Voxel Wall - Stacked blocks for stepped/jagged top
-const VoxelWall = ({ position, rotation, width, height, wallColor }) => {
+const VoxelWall = ({ position, rotation, width, height, wallColor, wallTopColor }) => {
     const noiseTexture = useMemo(() => createNoiseTexture(), []);
     const voxelsPerWidth = Math.ceil(width / VOXEL_SIZE);
     
-    // Create stepped top pattern (jagged like stairs)
+    // Create stepped top pattern (jagged like stairs) - chunkier blocks
     const createSteppedTop = (voxelIndex) => {
         // Create a pattern: some voxels are taller, creating steps
-        const stepPattern = Math.sin(voxelIndex * 0.3) * 0.5 + 0.5; // 0 to 1
+        const stepPattern = Math.sin(voxelIndex * 0.2) * 0.5 + 0.5; // 0 to 1
         return stepPattern > 0.6 ? 1 : 0; // Some voxels are 1 block taller
     };
     
@@ -209,31 +215,45 @@ const VoxelWall = ({ position, rotation, width, height, wallColor }) => {
                 <boxGeometry args={[width, height, WALL_THICKNESS]} />
                 <meshStandardMaterial
                     color={wallColor}
-                    roughness={0.95}
+                    roughness={0.9}
                     metalness={0.0}
                     map={noiseTexture}
                 />
             </mesh>
             
-            {/* Stepped top - stacked voxel blocks */}
+            {/* Stepped top - chunkier voxel blocks */}
             {Array.from({ length: voxelsPerWidth }).map((_, i) => {
                 const x = (i * VOXEL_SIZE) - (width / 2) + (VOXEL_SIZE / 2);
                 const extraHeight = createSteppedTop(i) * VOXEL_SIZE;
+                const blockHeight = extraHeight || VOXEL_SIZE;
                 
                 return (
-                    <mesh
-                        key={`top-${i}`}
-                        position={[x, height / 2 + extraHeight / 2, 0]}
-                        castShadow
-                    >
-                        <boxGeometry args={[VOXEL_SIZE - 0.05, extraHeight || VOXEL_SIZE, WALL_THICKNESS]} />
-                        <meshStandardMaterial
-                            color={wallColor}
-                            roughness={0.95}
-                            metalness={0.0}
-                            map={noiseTexture}
-                        />
-                    </mesh>
+                    <group key={`top-${i}`} position={[x, height / 2 + blockHeight / 2, 0]}>
+                        {/* Top face - lighter color */}
+                        <mesh
+                            position={[0, blockHeight / 2, 0]}
+                            rotation={[Math.PI / 2, 0, 0]}
+                            castShadow
+                        >
+                            <planeGeometry args={[VOXEL_SIZE - 0.02, WALL_THICKNESS]} />
+                            <meshStandardMaterial
+                                color={wallTopColor || wallColor}
+                                roughness={0.85}
+                                metalness={0.0}
+                            />
+                        </mesh>
+                        
+                        {/* Side block - with proper UV mapping */}
+                        <mesh castShadow>
+                            <boxGeometry args={[VOXEL_SIZE - 0.02, blockHeight, WALL_THICKNESS]} />
+                            <meshStandardMaterial
+                                color={wallColor}
+                                roughness={0.9}
+                                metalness={0.0}
+                                map={noiseTexture}
+                            />
+                        </mesh>
+                    </group>
                 );
             })}
             
@@ -242,7 +262,7 @@ const VoxelWall = ({ position, rotation, width, height, wallColor }) => {
                 <planeGeometry args={[width, height]} />
                 <meshStandardMaterial
                     color={wallColor}
-                    roughness={0.95}
+                    roughness={0.9}
                     metalness={0.0}
                     map={noiseTexture}
                 />
@@ -253,7 +273,8 @@ const VoxelWall = ({ position, rotation, width, height, wallColor }) => {
 
 // Back Wall with Window - Voxel style
 const BackWall = () => {
-    const wallColor = "#F5F5F0";
+    const wallColor = "#E8E8E5"; // Cool grey/off-white
+    const wallTopColor = "#F0F0ED"; // Lighter for top surfaces
     const windowWidth = 4;
     const windowHeight = 3;
     const windowY = 2;
@@ -269,6 +290,7 @@ const BackWall = () => {
                 width={extendedRoomSize}
                 height={WALL_HEIGHT}
                 wallColor={wallColor}
+                wallTopColor={wallTopColor}
             />
             
             {/* Window opening */}
@@ -308,7 +330,8 @@ const BackWall = () => {
 
 // Right Wall - Voxel style with stepped border
 const RightWall = () => {
-    const wallColor = "#B8C5D6";
+    const wallColor = "#D8D8D5"; // Cool grey, slightly darker than back wall
+    const wallTopColor = "#E5E5E2"; // Lighter for top surfaces
     // Extend wall to match extended floor
     const floorExtend = WALL_THICKNESS;
     const extendedRoomSize = ROOM_SIZE + floorExtend * 2;
@@ -321,6 +344,7 @@ const RightWall = () => {
                 width={extendedRoomSize}
                 height={WALL_HEIGHT}
                 wallColor={wallColor}
+                wallTopColor={wallTopColor}
             />
         </group>
     );

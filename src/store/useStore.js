@@ -38,6 +38,7 @@ const useStore = create((set, get) => ({
   objects: [],
   selectedId: null,
   gridEnabled: true, // Enable grid snapping by default
+  mode: 'edit', // 'edit' or 'view'
 
   addObject: (type) => {
     const id = uuidv4();
@@ -101,6 +102,10 @@ const useStore = create((set, get) => ({
 
   loadScene: (sceneData) => {
     set({ objects: sceneData.objects || [] });
+  },
+
+  setMode: (mode) => {
+    set({ mode });
   },
 }));
 
