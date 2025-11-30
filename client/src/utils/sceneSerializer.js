@@ -5,9 +5,10 @@
 /**
  * Serialize scene data for IPFS storage
  * @param {Array} objects - Array of objects from the store
+ * @param {Object} roomConfig - Room configuration (themes, lighting, walls, etc.)
  * @returns {Object} Serialized scene data
  */
-export function serializeScene(objects) {
+export function serializeScene(objects, roomConfig = null) {
     return {
         version: '1.0.0',
         timestamp: new Date().toISOString(),
@@ -20,28 +21,32 @@ export function serializeScene(objects) {
             color: obj.color,
             data: obj.data || {},
         })),
+        roomConfig: roomConfig || null, // Include room configuration (themes, lighting, walls, floor, etc.)
     };
 }
 
 /**
  * Deserialize scene data from IPFS
  * @param {Object} sceneData - Scene data from IPFS
- * @returns {Array} Array of objects for the store
+ * @returns {Object} Object containing objects array and roomConfig
  */
 export function deserializeScene(sceneData) {
     if (!sceneData || !sceneData.objects) {
         throw new Error('Invalid scene data');
     }
 
-    return sceneData.objects.map(obj => ({
-        id: obj.id,
-        type: obj.type,
-        position: obj.position || [0, 1, 0],
-        rotation: obj.rotation || [0, 0, 0],
-        scale: obj.scale || [1, 1, 1],
-        color: obj.color || '#ffffff',
-        data: obj.data || {},
-    }));
+    return {
+        objects: sceneData.objects.map(obj => ({
+            id: obj.id,
+            type: obj.type,
+            position: obj.position || [0, 1, 0],
+            rotation: obj.rotation || [0, 0, 0],
+            scale: obj.scale || [1, 1, 1],
+            color: obj.color || '#ffffff',
+            data: obj.data || {},
+        })),
+        roomConfig: sceneData.roomConfig || null, // Restore room configuration if present
+    };
 }
 
 /**
@@ -72,6 +77,11 @@ export function validateSceneData(sceneData) {
         if (!Array.isArray(obj.scale) || obj.scale.length !== 3) {
             return false;
         }
+    }
+
+    // roomConfig is optional, but if present should be an object
+    if (sceneData.roomConfig !== undefined && sceneData.roomConfig !== null && typeof sceneData.roomConfig !== 'object') {
+        return false;
     }
 
     return true;

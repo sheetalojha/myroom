@@ -14,6 +14,7 @@ const PublishPanel = () => {
     const { address, isConnected } = useAccount();
     const objects = useStore((state) => state.objects);
     const selectedId = useStore((state) => state.selectedId);
+    const roomConfig = useStore((state) => state.roomConfig);
 
     const [isPublishing, setIsPublishing] = useState(false);
     const [publishStatus, setPublishStatus] = useState(null);
@@ -108,8 +109,8 @@ const PublishPanel = () => {
             const provider = new ethers.BrowserProvider(window.ethereum);
             await blockchainService.initialize(provider);
 
-            // Serialize scene
-            const sceneData = serializeScene(objects);
+            // Serialize scene with room configuration
+            const sceneData = serializeScene(objects, roomConfig);
 
             setPublishStatus({ status: 'uploading', message: 'Uploading to IPFS via Lighthouse...' });
 

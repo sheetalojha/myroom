@@ -37,7 +37,7 @@ export default defineConfig({
     baseSepolia: {
       type: "http",
       chainType: "generic",
-      url: configVariable("BASE_SEPOLIA_RPC_URL"),
+      url: "https://sepolia.base.org",
       accounts: [configVariable("BASE_SEPOLIA_PRIVATE_KEY")],
     },
   },

@@ -46,9 +46,11 @@ const NFTLibrary = ({ isOpen, onClose }) => {
             // Fetch scene data from IPFS
             const sceneData = await blockchainService.fetchSceneFromIPFS(scene.sceneCID);
 
-            // Deserialize and load into editor
-            const objects = deserializeScene(sceneData);
-            loadScene({ objects });
+            // Deserialize scene data (now returns { objects, roomConfig })
+            const deserializedData = deserializeScene(sceneData);
+            
+            // Load scene with both objects and roomConfig
+            loadScene(deserializedData);
 
             onClose();
         } catch (error) {
