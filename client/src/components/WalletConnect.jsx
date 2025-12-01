@@ -82,45 +82,37 @@ const WalletConnect = () => {
         <button
           onClick={handleConnect}
           style={{
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            padding: '6px 14px',
-            borderRadius: '20px',
+            backgroundColor: '#ff6b9d',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '9999px',
+            padding: '12px 24px',
+            fontSize: '16px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            fontSize: 11,
-            fontWeight: 500,
-            color: '#1A202C',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            transition: 'all 0.15s ease'
+            gap: '8px',
+            transition: 'opacity 0.2s',
+            fontWeight: 500
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
-          }}
+          onMouseEnter={(e) => e.target.style.opacity = '0.9'}
+          onMouseLeave={(e) => e.target.style.opacity = '1'}
         >
-          <Wallet size={12} />
+          <Wallet size={16} />
           Connect Wallet
         </button>
         {connectError && (
           <div style={{
             marginTop: 8,
-            padding: '8px 12px',
-            background: 'rgba(255, 238, 238, 0.95)',
-            backdropFilter: 'blur(16px)',
+            padding: '8px 16px',
+            background: '#FEFCF3',
             color: '#c33',
-            borderRadius: '12px',
+            borderRadius: '9999px',
             fontSize: 11,
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            border: '1px solid rgba(0, 0, 0, 0.1)'
           }}>
             <AlertCircle size={12} />
             {connectError.message}
@@ -141,29 +133,24 @@ const WalletConnect = () => {
         <button
           onClick={handleSwitchNetwork}
           style={{
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            padding: '6px 14px',
-            borderRadius: '20px',
+            backgroundColor: '#ff6b9d',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '9999px',
+            padding: '12px 24px',
+            fontSize: '16px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            fontSize: 11,
+            gap: '8px',
+            transition: 'opacity 0.2s',
             fontWeight: 500,
-            color: '#1A202C',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            transition: 'all 0.15s ease'
+            marginBottom: '8px'
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
-          }}
+          onMouseEnter={(e) => e.target.style.opacity = '0.9'}
+          onMouseLeave={(e) => e.target.style.opacity = '1'}
         >
-          <AlertCircle size={12} />
+          <AlertCircle size={16} />
           Switch Network
         </button>
       )}
@@ -171,36 +158,32 @@ const WalletConnect = () => {
         <button
           onClick={() => setShowMenu(!showMenu)}
           style={{
+            backgroundColor: '#FEFCF3',
+            color: '#1A202C',
+            border: '1px solid rgba(0, 0, 0, 0.15)',
+            borderRadius: '9999px',
+            padding: '12px 24px',
+            fontSize: '16px',
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(16px)',
-            padding: '6px 10px',
-            borderRadius: '20px',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            cursor: 'pointer',
-            transition: 'all 0.15s ease'
+            gap: '8px',
+            transition: 'all 0.2s',
+            fontWeight: 500
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+            e.target.style.backgroundColor = '#F5F5F5';
+            e.target.style.borderColor = 'rgba(0, 0, 0, 0.25)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
+            e.target.style.backgroundColor = '#FEFCF3';
+            e.target.style.borderColor = 'rgba(0, 0, 0, 0.15)';
           }}
         >
-          <Wallet size={12} color="#1A202C" />
-          <span style={{
-            fontSize: 11,
-            fontWeight: 500,
-            color: '#1A202C'
-          }}>
-            {formatAddress(address)}
-          </span>
+          <Wallet size={16} />
+          <span>{formatAddress(address)}</span>
           <ChevronDown 
-            size={12} 
-            color="#6B7280" 
+            size={16} 
             style={{
               transition: 'transform 0.15s ease',
               transform: showMenu ? 'rotate(180deg)' : 'rotate(0deg)'
@@ -215,11 +198,10 @@ const WalletConnect = () => {
             top: '100%',
             right: 0,
             marginTop: 8,
-            background: 'rgba(255, 255, 255, 0.98)',
-            backdropFilter: 'blur(16px)',
-            borderRadius: '16px',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+            background: '#FEFCF3',
+            borderRadius: '24px',
+            border: '1px solid rgba(0, 0, 0, 0.15)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
             minWidth: 200,
             overflow: 'hidden',
             zIndex: 1000,
@@ -228,8 +210,7 @@ const WalletConnect = () => {
             {/* Account Info */}
             <div style={{
               padding: '12px 16px',
-              borderBottom: '1px solid rgba(0,0,0,0.06)',
-              background: 'rgba(0,0,0,0.02)'
+              borderBottom: '1px solid rgba(0,0,0,0.08)'
             }}>
               <div style={{
                 fontSize: 10,
@@ -256,7 +237,7 @@ const WalletConnect = () => {
               padding: '8px',
               display: 'flex',
               flexDirection: 'column',
-              gap: 4
+              gap: 2
             }}>
               <button
                 onClick={handleCopyAddress}
@@ -264,19 +245,19 @@ const WalletConnect = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 8,
-                  padding: '8px 12px',
-                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  borderRadius: '9999px',
                   border: 'none',
                   background: 'transparent',
                   cursor: 'pointer',
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: 500,
                   color: '#1A202C',
                   transition: 'all 0.15s ease',
                   textAlign: 'left'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(0,0,0,0.04)';
+                  e.currentTarget.style.background = 'rgba(0,0,0,0.05)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'transparent';
@@ -292,19 +273,19 @@ const WalletConnect = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 8,
-                  padding: '8px 12px',
-                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  borderRadius: '9999px',
                   border: 'none',
                   background: 'transparent',
                   cursor: 'pointer',
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: 500,
                   color: '#1A202C',
                   transition: 'all 0.15s ease',
                   textAlign: 'left'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(0,0,0,0.04)';
+                  e.currentTarget.style.background = 'rgba(0,0,0,0.05)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'transparent';
@@ -320,19 +301,19 @@ const WalletConnect = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 8,
-                  padding: '8px 12px',
-                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  borderRadius: '9999px',
                   border: 'none',
                   background: 'transparent',
                   cursor: 'pointer',
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: 500,
                   color: '#1A202C',
                   transition: 'all 0.15s ease',
                   textAlign: 'left'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(0,0,0,0.04)';
+                  e.currentTarget.style.background = 'rgba(0,0,0,0.05)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'transparent';
@@ -344,8 +325,8 @@ const WalletConnect = () => {
 
               <div style={{
                 height: 1,
-                background: 'rgba(0,0,0,0.06)',
-                margin: '4px 0'
+                background: 'rgba(0,0,0,0.08)',
+                margin: '6px 8px'
               }} />
 
               <button
@@ -357,12 +338,12 @@ const WalletConnect = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 8,
-                  padding: '8px 12px',
-                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  borderRadius: '9999px',
                   border: 'none',
                   background: 'transparent',
                   cursor: 'pointer',
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: 500,
                   color: '#DC2626',
                   transition: 'all 0.15s ease',

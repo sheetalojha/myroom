@@ -143,11 +143,11 @@ const FloorGrid = () => {
                 <lineBasicMaterial
                     color="#2C1810"
                     transparent
-                    opacity={0.15}
+                    opacity={0.2}
                 />
             </lineSegments>
             
-            {/* Major grid lines */}
+            {/* Major grid lines - more visible */}
             {Array.from({ length: Math.floor(divisions / 5) + 1 }).map((_, i) => {
                 const pos = (i * 5 * cellSize) - (gridSize / 2);
                 return (
@@ -164,7 +164,7 @@ const FloorGrid = () => {
                                     itemSize={3}
                                 />
                             </bufferGeometry>
-                            <lineBasicMaterial color="#1A0F0A" transparent opacity={0.3} />
+                            <lineBasicMaterial color="#1A0F0A" transparent opacity={0.4} />
                         </line>
                         <line>
                             <bufferGeometry>
@@ -178,17 +178,90 @@ const FloorGrid = () => {
                                     itemSize={3}
                                 />
                             </bufferGeometry>
-                            <lineBasicMaterial color="#1A0F0A" transparent opacity={0.3} />
+                            <lineBasicMaterial color="#1A0F0A" transparent opacity={0.4} />
                         </line>
                     </group>
                 );
             })}
             
-            {/* Origin marker */}
-            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]}>
-                <ringGeometry args={[0.15, 0.2, 16]} />
-                <meshBasicMaterial color="#1A0F0A" transparent opacity={0.5} />
-            </mesh>
+            {/* Center lines (X and Z axes) - most visible */}
+            <line>
+                <bufferGeometry>
+                    <bufferAttribute
+                        attach="attributes-position"
+                        count={2}
+                        array={new Float32Array([
+                            -gridSize / 2, 0.005, 0,
+                            gridSize / 2, 0.005, 0
+                        ])}
+                        itemSize={3}
+                    />
+                </bufferGeometry>
+                <lineBasicMaterial color="#1A0F0A" transparent opacity={0.6} />
+            </line>
+            <line>
+                <bufferGeometry>
+                    <bufferAttribute
+                        attach="attributes-position"
+                        count={2}
+                        array={new Float32Array([
+                            0, 0.005, -gridSize / 2,
+                            0, 0.005, gridSize / 2
+                        ])}
+                        itemSize={3}
+                    />
+                </bufferGeometry>
+                <lineBasicMaterial color="#1A0F0A" transparent opacity={0.6} />
+            </line>
+            
+            {/* Enhanced Origin marker - more visible */}
+            <group>
+                {/* Outer ring */}
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.006, 0]}>
+                    <ringGeometry args={[0.2, 0.25, 32]} />
+                    <meshBasicMaterial color="#1A0F0A" transparent opacity={0.7} />
+                </mesh>
+                {/* Inner filled circle */}
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.007, 0]}>
+                    <circleGeometry args={[0.15, 32]} />
+                    <meshBasicMaterial color="#1A0F0A" transparent opacity={0.8} />
+                </mesh>
+                {/* Center dot */}
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.008, 0]}>
+                    <circleGeometry args={[0.05, 16]} />
+                    <meshBasicMaterial color="#FFFFFF" />
+                </mesh>
+                {/* X-axis indicator line */}
+                <line>
+                    <bufferGeometry>
+                        <bufferAttribute
+                            attach="attributes-position"
+                            count={2}
+                            array={new Float32Array([
+                                0.3, 0.006, 0,
+                                0.5, 0.006, 0
+                            ])}
+                            itemSize={3}
+                        />
+                    </bufferGeometry>
+                    <lineBasicMaterial color="#1A0F0A" transparent opacity={0.6} linewidth={2} />
+                </line>
+                {/* Z-axis indicator line */}
+                <line>
+                    <bufferGeometry>
+                        <bufferAttribute
+                            attach="attributes-position"
+                            count={2}
+                            array={new Float32Array([
+                                0, 0.006, 0.3,
+                                0, 0.006, 0.5
+                            ])}
+                            itemSize={3}
+                        />
+                    </bufferGeometry>
+                    <lineBasicMaterial color="#1A0F0A" transparent opacity={0.6} linewidth={2} />
+                </line>
+            </group>
         </group>
     );
 };

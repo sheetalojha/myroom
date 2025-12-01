@@ -7,9 +7,10 @@
 body {
   margin: 0;
   padding: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: radial-gradient(circle at center, #E6F2FF 0%, #B3D9FF 50%, #87CEEB 100%);
 }
 

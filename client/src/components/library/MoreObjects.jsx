@@ -1,25 +1,25 @@
 import React from 'react';
+import { RoundedBox } from '@react-three/drei';
 
-// Voxel helper function
-const VoxelBox = ({ position, size = [1, 1, 1], color }) => (
-    <mesh position={position}>
-        <boxGeometry args={size} />
-        <meshStandardMaterial color={color} />
-    </mesh>
+// Voxel helper function with rounded edges for cuter look
+const VoxelBox = ({ position, size = [1, 1, 1], color, radius = 0.05 }) => (
+    <RoundedBox position={position} args={size} radius={radius} smoothness={4}>
+        <meshStandardMaterial color={color} roughness={0.3} metalness={0.1} />
+    </RoundedBox>
 );
 
 const scale = 1.8;
 
-export const VoxelTV = ({ color = '#1a1a1a' }) => (
+export const VoxelTV = ({ color = '#2C2C2C' }) => (
     <group>
         {/* Screen */}
-        <VoxelBox position={[0, 0.8 * scale, 0]} size={[2.5 * scale, 1.8 * scale, 0.2 * scale]} color={color} />
+        <VoxelBox position={[0, 0.8 * scale, 0]} size={[2.5 * scale, 1.8 * scale, 0.2 * scale]} color={color} radius={0.08} />
         {/* Screen glow */}
-        <VoxelBox position={[0, 0.8 * scale, 0.11 * scale]} size={[2.3 * scale, 1.6 * scale, 0.05]} color="#4a9eff" />
+        <VoxelBox position={[0, 0.8 * scale, 0.11 * scale]} size={[2.3 * scale, 1.6 * scale, 0.05]} color="#87CEEB" radius={0.06} />
         {/* Stand */}
-        <VoxelBox position={[0, 0.2 * scale, 0]} size={[0.4 * scale, 0.4 * scale, 0.4 * scale]} color="#333" />
+        <VoxelBox position={[0, 0.2 * scale, 0]} size={[0.4 * scale, 0.4 * scale, 0.4 * scale]} color="#1A1A1A" radius={0.06} />
         {/* Base */}
-        <VoxelBox position={[0, 0.05 * scale, 0]} size={[1.2 * scale, 0.1 * scale, 0.6 * scale]} color="#333" />
+        <VoxelBox position={[0, 0.05 * scale, 0]} size={[1.2 * scale, 0.1 * scale, 0.6 * scale]} color="#1A1A1A" radius={0.08} />
     </group>
 );
 
@@ -47,17 +47,17 @@ export const VoxelClock = ({ color = '#f5f5f5' }) => (
     </group>
 );
 
-export const VoxelCactus = ({ color = '#4caf50' }) => (
+export const VoxelCactus = ({ color = '#90EE90' }) => (
     <group>
         {/* Pot */}
-        <VoxelBox position={[0, 0.15 * scale, 0]} size={[0.4 * scale, 0.3 * scale, 0.4 * scale]} color="#8d6e63" />
+        <VoxelBox position={[0, 0.15 * scale, 0]} size={[0.4 * scale, 0.3 * scale, 0.4 * scale]} color="#FFB6C1" radius={0.08} />
         {/* Main body */}
-        <VoxelBox position={[0, 0.5 * scale, 0]} size={[0.3 * scale, 0.8 * scale, 0.3 * scale]} color={color} />
+        <VoxelBox position={[0, 0.5 * scale, 0]} size={[0.3 * scale, 0.8 * scale, 0.3 * scale]} color={color} radius={0.12} />
         {/* Arms */}
-        <VoxelBox position={[-0.2 * scale, 0.7 * scale, 0]} size={[0.25 * scale, 0.4 * scale, 0.25 * scale]} color={color} />
-        <VoxelBox position={[0.2 * scale, 0.7 * scale, 0]} size={[0.25 * scale, 0.4 * scale, 0.25 * scale]} color={color} />
+        <VoxelBox position={[-0.2 * scale, 0.7 * scale, 0]} size={[0.25 * scale, 0.4 * scale, 0.25 * scale]} color={color} radius={0.1} />
+        <VoxelBox position={[0.2 * scale, 0.7 * scale, 0]} size={[0.25 * scale, 0.4 * scale, 0.25 * scale]} color={color} radius={0.1} />
         {/* Top */}
-        <VoxelBox position={[0, 1.1 * scale, 0]} size={[0.25 * scale, 0.3 * scale, 0.25 * scale]} color={color} />
+        <VoxelBox position={[0, 1.1 * scale, 0]} size={[0.25 * scale, 0.3 * scale, 0.25 * scale]} color={color} radius={0.1} />
     </group>
 );
 
@@ -74,16 +74,16 @@ export const VoxelLamp = ({ color = '#ffeb3b' }) => (
     </group>
 );
 
-export const VoxelVase = ({ color = '#e91e63' }) => (
+export const VoxelVase = ({ color = '#FFB6C1' }) => (
     <group>
         {/* Vase body */}
-        <VoxelBox position={[0, 0.3 * scale, 0]} size={[0.4 * scale, 0.6 * scale, 0.4 * scale]} color={color} />
+        <VoxelBox position={[0, 0.3 * scale, 0]} size={[0.4 * scale, 0.6 * scale, 0.4 * scale]} color={color} radius={0.1} />
         {/* Top rim */}
-        <VoxelBox position={[0, 0.65 * scale, 0]} size={[0.35 * scale, 0.1 * scale, 0.35 * scale]} color={color} />
+        <VoxelBox position={[0, 0.65 * scale, 0]} size={[0.35 * scale, 0.1 * scale, 0.35 * scale]} color={color} radius={0.08} />
         {/* Flowers */}
-        <VoxelBox position={[0, 0.9 * scale, 0]} size={[0.15 * scale, 0.2 * scale, 0.15 * scale]} color="#ff6b9d" />
-        <VoxelBox position={[-0.1 * scale, 0.85 * scale, 0]} size={[0.1 * scale, 0.15 * scale, 0.1 * scale]} color="#ff6b9d" />
-        <VoxelBox position={[0.1 * scale, 0.85 * scale, 0]} size={[0.1 * scale, 0.15 * scale, 0.1 * scale]} color="#ff6b9d" />
+        <VoxelBox position={[0, 0.9 * scale, 0]} size={[0.15 * scale, 0.2 * scale, 0.15 * scale]} color="#FF69B4" radius={0.06} />
+        <VoxelBox position={[-0.1 * scale, 0.85 * scale, 0]} size={[0.1 * scale, 0.15 * scale, 0.1 * scale]} color="#FF69B4" radius={0.05} />
+        <VoxelBox position={[0.1 * scale, 0.85 * scale, 0]} size={[0.1 * scale, 0.15 * scale, 0.1 * scale]} color="#FF69B4" radius={0.05} />
     </group>
 );
 
@@ -96,9 +96,9 @@ export const VoxelBooks = ({ color = '#8b4513' }) => (
     </group>
 );
 
-export const VoxelPillow = ({ color = '#f8bbd0' }) => (
+export const VoxelPillow = ({ color = '#FFB6C1' }) => (
     <group>
-        <VoxelBox position={[0, 0.1 * scale, 0]} size={[1.2 * scale, 0.2 * scale, 1.2 * scale]} color={color} />
+        <VoxelBox position={[0, 0.1 * scale, 0]} size={[1.2 * scale, 0.2 * scale, 1.2 * scale]} color={color} radius={0.15} />
     </group>
 );
 

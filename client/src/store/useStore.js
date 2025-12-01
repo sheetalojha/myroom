@@ -137,7 +137,11 @@ const useStore = create((set, get) => ({
           ...state.roomConfig,
           colorTheme: themeName,
           background: theme.background,
-          leftWall: theme.leftWall,
+          // Preserve leftWall visibility setting when switching themes
+          leftWall: {
+            ...theme.leftWall,
+            visible: state.roomConfig.leftWall?.visible !== false ? theme.leftWall.visible : false
+          },
           rightWall: theme.rightWall,
           backWall: theme.backWall,
           floor: theme.floor
