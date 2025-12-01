@@ -67,9 +67,11 @@ const EditorObject = React.memo(({ id, type, position, rotation, scale, color, d
     const registryItem = useMemo(() => Registry[type], [type]);
     const Component = registryItem ? registryItem.component : null;
 
+    const isPhysicsObject = registryItem?.isPhysics;
+    
     return (
         <>
-            {isEditMode && isSelected && (
+            {isEditMode && isSelected && !isPhysicsObject && (
                 <TransformControls
                     object={groupRef}
                     mode="translate"
@@ -85,7 +87,11 @@ const EditorObject = React.memo(({ id, type, position, rotation, scale, color, d
                 onClick={handleClick}
             >
                 {Component ? (
-                    <Component color={color} data={data} onUpdate={handleUpdate} />
+                    isPhysicsObject ? (
+                        <Component id={id} color={color} data={data} />
+                    ) : (
+                        <Component color={color} data={data} onUpdate={handleUpdate} />
+                    )
                 ) : (
                     // Fallback for legacy objects
                     <mesh>

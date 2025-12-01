@@ -364,7 +364,9 @@ class BlockchainService {
                         objectTokenIds: metadata.objectTokenIds.map(id => Number(id)),
                         version: Number(metadata.version),
                         createdAt: Number(metadata.createdAt),
+                        createdAtDate: new Date(Number(metadata.createdAt) * 1000),
                         creator: metadata.creator,
+                        parentTokenId: Number(metadata.parentTokenId || 0),
                         remixable: metadata.remixable
                     };
                 })

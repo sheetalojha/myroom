@@ -4,6 +4,7 @@ import { ethers } from 'ethers';
 import useStore from '../store/useStore';
 import { Leva } from 'leva';
 import { Registry, Categories } from './library/Registry';
+import ObjectPreview from './ObjectPreview';
 import PerformanceNotification from './PerformanceNotification';
 import WalletConnect from './WalletConnect';
 import PublishPanel from './PublishPanel';
@@ -32,6 +33,8 @@ const CategoryIcons = {
     Decor: Flower2,
     Lighting: Lamp,
     Cute: Smile,
+    Electronics: Box,
+    Characters: Smile,
 };
 
 const UIOverlay = () => {
@@ -55,10 +58,10 @@ const UIOverlay = () => {
     const roomConfig = useStore((state) => state.roomConfig);
     const setColorTheme = useStore((state) => state.setColorTheme);
     
-    // Fetch chamber name if editing an existing chamber
+    // Fetch chamber name if editing/viewing an existing chamber
     useEffect(() => {
         const fetchChamberName = async () => {
-            if (currentChamberTokenId !== null && isConnected && window.ethereum) {
+            if (currentChamberTokenId !== null && window.ethereum) {
                 try {
                     const provider = new ethers.BrowserProvider(window.ethereum);
                     await blockchainService.initialize(provider);
@@ -74,7 +77,7 @@ const UIOverlay = () => {
         };
         
         fetchChamberName();
-    }, [currentChamberTokenId, isConnected]);
+    }, [currentChamberTokenId, mode]); // Also depend on mode to refresh when switching
     const setLighting = useStore((state) => state.setLighting);
     const updateRoomConfig = useStore((state) => state.updateRoomConfig);
 
@@ -391,15 +394,15 @@ const UIOverlay = () => {
                     bottom: 24,
                     width: 320,
                     maxHeight: 'calc(100vh - 96px)',
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    backdropFilter: 'blur(16px)',
-                    borderRadius: '16px',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,255,0.98) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '20px',
+                    boxShadow: '0 12px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
                     display: 'flex',
                     flexDirection: 'column',
                     pointerEvents: 'auto',
                     overflow: 'hidden',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    border: '1px solid rgba(255, 255, 255, 0.5)',
                     zIndex: 90
                 }}>
                     <div style={{
@@ -686,24 +689,25 @@ const UIOverlay = () => {
                     top: 72,
                     left: 24,
                     bottom: 24,
-                    width: 280,
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    backdropFilter: 'blur(16px)',
-                    borderRadius: '16px',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                    width: 300,
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,255,0.98) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '20px',
+                    boxShadow: '0 12px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
                     display: 'flex',
                     flexDirection: 'column',
                     pointerEvents: 'auto',
                     overflow: 'hidden',
-                    border: '1px solid rgba(255, 255, 255, 0.3)'
+                    border: '1px solid rgba(255, 255, 255, 0.5)'
                 }}>
-                    {/* Categories - Minimal */}
+                    {/* Categories - Beautiful */}
                     <div style={{
                         display: 'flex',
-                        gap: 4,
-                        padding: '12px',
+                        gap: 6,
+                        padding: '14px',
                         overflowX: 'auto',
-                        borderBottom: '1px solid rgba(0,0,0,0.06)'
+                        borderBottom: '1px solid rgba(0,0,0,0.06)',
+                        background: 'rgba(248,250,252,0.5)'
                     }}>
                         {Categories.map((cat) => {
                             const Icon = CategoryIcons[cat] || Box;
@@ -713,38 +717,51 @@ const UIOverlay = () => {
                                     key={cat}
                                     onClick={() => setActiveCategory(cat)}
                                     style={{
-                                        padding: '8px 12px',
-                                        borderRadius: '8px',
+                                        padding: '8px 14px',
+                                        borderRadius: '12px',
                                         border: 'none',
                                         background: isActive
-                                            ? '#1A202C'
-                                            : 'transparent',
+                                            ? 'linear-gradient(135deg, #1A202C 0%, #2D3748 100%)'
+                                            : 'rgba(255,255,255,0.8)',
                                         color: isActive ? '#FFFFFF' : '#1A202C',
                                         cursor: 'pointer',
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: 6,
-                                        fontSize: 12,
+                                        fontSize: 11,
                                         fontWeight: isActive ? 600 : 500,
                                         whiteSpace: 'nowrap',
-                                        transition: 'all 0.15s ease'
+                                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        boxShadow: isActive ? '0 2px 8px rgba(26,32,44,0.2)' : 'none'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (!isActive) {
+                                            e.currentTarget.style.background = 'rgba(255,255,255,1)';
+                                            e.currentTarget.style.transform = 'translateY(-1px)';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!isActive) {
+                                            e.currentTarget.style.background = 'rgba(255,255,255,0.8)';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                        }
                                     }}
                                 >
-                                    <Icon size={14} />
+                                    <Icon size={13} />
                                     {cat}
                                 </button>
                             );
                         })}
                     </div>
 
-                    {/* Grid - Minimal */}
+                    {/* Grid - Minimal with 3D Previews */}
                     <div style={{
                         flex: 1,
                         overflowY: 'auto',
                         padding: '12px',
                         display: 'grid',
                         gridTemplateColumns: 'repeat(2, 1fr)',
-                        gap: 8,
+                        gap: 10,
                         alignContent: 'start'
                     }}>
                         {filteredItems.map(([type, item]) => (
@@ -753,40 +770,51 @@ const UIOverlay = () => {
                                 onClick={() => addObject(type)}
                                 style={{
                                     aspectRatio: '1',
-                                    background: 'rgba(0, 0, 0, 0.02)',
-                                    borderRadius: '8px',
+                                    background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.9) 100%)',
+                                    borderRadius: '12px',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    border: '1px solid rgba(0,0,0,0.06)',
-                                    transition: 'all 0.15s ease',
-                                    padding: 12
+                                    border: '1px solid rgba(0,0,0,0.08)',
+                                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    padding: 8,
+                                    position: 'relative',
+                                    overflow: 'hidden'
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = 'rgba(0, 0, 0, 0.04)';
-                                    e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)';
+                                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(241,245,249,1) 100%)';
+                                    e.currentTarget.style.borderColor = 'rgba(26,32,44,0.2)';
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = 'rgba(0, 0, 0, 0.02)';
-                                    e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)';
+                                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.9) 100%)';
+                                    e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = 'none';
                                 }}
                             >
+                                {/* 3D Preview */}
                                 <div style={{
-                                    marginBottom: 8,
-                                    color: '#1A202C',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
+                                    width: '100%',
+                                    height: '70%',
+                                    position: 'relative',
+                                    borderRadius: '8px',
+                                    overflow: 'hidden',
+                                    background: 'rgba(255,255,255,0.5)'
                                 }}>
-                                    <Box size={32} strokeWidth={1.5} />
+                                    <ObjectPreview type={type} />
                                 </div>
+                                {/* Label */}
                                 <span style={{
-                                    fontSize: 11,
+                                    fontSize: 10,
                                     textAlign: 'center',
                                     color: '#1A202C',
-                                    fontWeight: 500
+                                    fontWeight: 600,
+                                    marginTop: 6,
+                                    letterSpacing: '-0.01em'
                                 }}>
                                     {item.label}
                                 </span>
@@ -801,19 +829,19 @@ const UIOverlay = () => {
                 position: 'absolute',
                 bottom: 24,
                 left: 24,
-                background: 'rgba(255, 255, 255, 0.95)',
-                backdropFilter: 'blur(16px)',
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,255,0.98) 100%)',
+                backdropFilter: 'blur(20px)',
                 borderRadius: '20px',
-                padding: '8px 14px',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                padding: '10px 16px',
+                border: '1px solid rgba(255, 255, 255, 0.5)',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
                 pointerEvents: 'auto',
                 zIndex: 100
             }}>
                 <div style={{
-                    fontSize: 11,
-                    fontWeight: 500,
-                    color: '#6B7280',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: '#1A202C',
                     letterSpacing: '-0.01em',
                     maxWidth: 200,
                     overflow: 'hidden',
@@ -823,6 +851,41 @@ const UIOverlay = () => {
                     {chamberName}
                 </div>
             </div>
+
+            {/* Human Controls Hint - only in view mode when human exists */}
+            {!isEditMode && objects.some(obj => obj.type === 'human') && (
+                <div style={{
+                    position: 'absolute',
+                    bottom: 24,
+                    right: 24,
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,255,0.98) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '16px',
+                    padding: '12px 16px',
+                    border: '1px solid rgba(255, 255, 255, 0.5)',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+                    pointerEvents: 'auto',
+                    zIndex: 100,
+                    maxWidth: 250
+                }}>
+                    <div style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: '#1A202C',
+                        marginBottom: 6
+                    }}>
+                        🎮 Human Controls
+                    </div>
+                    <div style={{
+                        fontSize: 10,
+                        color: '#6B7280',
+                        lineHeight: 1.5
+                    }}>
+                        <div>WASD - Move</div>
+                        <div>Space - Jump</div>
+                    </div>
+                </div>
+            )}
 
             {/* Leva Panel (Properties) - only in edit mode when object selected */}
             {isEditMode && selectedId && !customizeOpen && (

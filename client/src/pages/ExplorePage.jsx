@@ -11,28 +11,94 @@ const ExplorePage = () => {
   const navigate = useNavigate();
   const { address, isConnected } = useAccount();
   const [scenes, setScenes] = useState([]);
+  const [groupedScenes, setGroupedScenes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredScenes, setFilteredScenes] = useState([]);
+  const [filteredGroupedScenes, setFilteredGroupedScenes] = useState([]);
 
   useEffect(() => {
     // Always try to fetch scenes, even if not connected (read-only operations)
     fetchAllScenes();
   }, []);
 
+  // Group scenes by version - find root parent and group all versions together
+  const groupScenesByVersion = (scenesList) => {
+    const groups = new Map();
+    
+    // First pass: identify root scenes (parentTokenId === 0 or null)
+    scenesList.forEach(scene => {
+      const parentId = scene.parentTokenId || 0;
+      if (parentId === 0) {
+        // This is a root scene
+        if (!groups.has(scene.tokenId)) {
+          groups.set(scene.tokenId, {
+            root: scene,
+            versions: [scene]
+          });
+        }
+      }
+    });
+    
+    // Second pass: add versions to their parent groups
+    scenesList.forEach(scene => {
+      const parentId = scene.parentTokenId || 0;
+      if (parentId !== 0) {
+        // Find the root by traversing up the parent chain
+        let currentParentId = parentId;
+        let rootId = null;
+        
+        // Traverse up to find root
+        while (currentParentId !== 0) {
+          const parentScene = scenesList.find(s => s.tokenId === currentParentId);
+          if (!parentScene) break;
+          if (parentScene.parentTokenId === 0 || !parentScene.parentTokenId) {
+            rootId = parentScene.tokenId;
+            break;
+          }
+          currentParentId = parentScene.parentTokenId;
+        }
+        
+        if (rootId && groups.has(rootId)) {
+          groups.get(rootId).versions.push(scene);
+        } else if (rootId) {
+          // Root not found in our list, create new group
+          const rootScene = scenesList.find(s => s.tokenId === rootId);
+          if (rootScene) {
+            groups.set(rootId, {
+              root: rootScene,
+              versions: [rootScene, scene]
+            });
+          }
+        }
+      }
+    });
+    
+    // Sort versions within each group by version number
+    groups.forEach(group => {
+      group.versions.sort((a, b) => (a.version || 1) - (b.version || 1));
+    });
+    
+    return Array.from(groups.values());
+  };
+
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setFilteredScenes(scenes);
+      setFilteredGroupedScenes(groupedScenes);
     } else {
       const query = searchQuery.toLowerCase();
-      setFilteredScenes(
-        scenes.filter(scene =>
-          scene.name?.toLowerCase().includes(query) ||
-          scene.creator?.toLowerCase().includes(query)
-        )
+      const filtered = scenes.filter(scene =>
+        scene.name?.toLowerCase().includes(query) ||
+        scene.creator?.toLowerCase().includes(query)
       );
+      setFilteredScenes(filtered);
+      
+      // Group filtered scenes
+      const grouped = groupScenesByVersion(filtered);
+      setFilteredGroupedScenes(grouped);
     }
-  }, [searchQuery, scenes]);
+  }, [searchQuery, scenes, groupedScenes]);
 
   const fetchAllScenes = async () => {
     setLoading(true);
@@ -57,6 +123,11 @@ const ExplorePage = () => {
 
       setScenes(scenesWithThumbnails);
       setFilteredScenes(scenesWithThumbnails);
+      
+      // Group scenes by version
+      const grouped = groupScenesByVersion(scenesWithThumbnails);
+      setGroupedScenes(grouped);
+      setFilteredGroupedScenes(grouped);
     } catch (error) {
       console.error('Error fetching scenes:', error);
       setScenes([]);
@@ -212,7 +283,7 @@ const ExplorePage = () => {
               Loading...
             </p>
           </div>
-        ) : filteredScenes.length === 0 ? (
+        ) : filteredGroupedScenes.length === 0 ? (
           <div style={{
             textAlign: 'center',
             padding: '120px 20px',
@@ -242,144 +313,179 @@ const ExplorePage = () => {
           </div>
         ) : (
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-            gap: 20
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 24
           }}>
-            {filteredScenes.map((scene) => (
+            {filteredGroupedScenes.map((group) => (
               <div
-                key={scene.tokenId}
-                onClick={() => navigate(`/chamber/${scene.tokenId}`)}
+                key={group.root.tokenId}
                 style={{
                   background: 'white',
                   borderRadius: '20px',
-                  overflow: 'hidden',
-                  cursor: 'pointer',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                  transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                  border: '1px solid #F1F5F9'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.08)';
-                  e.currentTarget.style.borderColor = '#E2E8F0';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
-                  e.currentTarget.style.borderColor = '#F1F5F9';
+                  padding: '20px',
+                  border: '1px solid #F1F5F9',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
                 }}
               >
-                {/* Thumbnail */}
+                {/* Group Header */}
                 <div style={{
-                  width: '100%',
-                  aspectRatio: '1',
-                  background: 'linear-gradient(135deg, #F0F4F8 0%, #E2E8F0 100%)',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  overflow: 'hidden'
+                  justifyContent: 'space-between',
+                  marginBottom: 16,
+                  paddingBottom: 16,
+                  borderBottom: '1px solid #F1F5F9'
                 }}>
-                  {scene.thumbnailUrl ? (
-                    <img
-                      src={scene.thumbnailUrl}
-                      alt={scene.name}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover'
-                      }}
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  ) : (
+                  <div>
+                    <h2 style={{
+                      fontSize: 18,
+                      fontWeight: 600,
+                      color: '#2D3748',
+                      margin: '0 0 4px 0',
+                      letterSpacing: '-0.01em'
+                    }}>
+                      {group.root.name || `Chamber #${group.root.tokenId}`}
+                    </h2>
                     <div style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: '16px',
-                      background: 'linear-gradient(135deg, #E2E8F0 0%, #CBD5E0 100%)',
+                      fontSize: 12,
+                      color: '#718096',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center'
+                      gap: 8
                     }}>
-                      <Home size={24} color="#A0AEC0" />
-                    </div>
-                  )}
-                  {scene.remixable && (
-                    <div style={{
-                      position: 'absolute',
-                      top: 10,
-                      right: 10,
-                      background: 'rgba(255, 255, 255, 0.95)',
-                      backdropFilter: 'blur(8px)',
-                      borderRadius: '8px',
-                      padding: '4px 8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 4,
-                      fontSize: 10,
-                      fontWeight: 500,
-                      color: '#667EEA',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-                    }}>
-                      <Sparkles size={10} />
-                      <span>Remix</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Info */}
-                <div style={{
-                  padding: '16px'
-                }}>
-                  <h3 style={{
-                    fontSize: 15,
-                    fontWeight: 600,
-                    color: '#2D3748',
-                    margin: '0 0 12px 0',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    letterSpacing: '-0.01em'
-                  }}>
-                    {scene.name || `Chamber #${scene.tokenId}`}
-                  </h3>
-
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 6
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      fontSize: 11,
-                      color: '#718096'
-                    }}>
-                      <User size={12} />
-                      <span>{formatAddress(scene.creator)}</span>
-                    </div>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      fontSize: 11,
-                      color: '#718096'
-                    }}>
-                      <Calendar size={12} />
-                      <span>{formatDate(scene.createdAtDate)}</span>
-                    </div>
-                    <div style={{
-                      fontSize: 11,
-                      color: '#A0AEC0',
-                      marginTop: 2
-                    }}>
-                      {scene.objectTokenIds.length} {scene.objectTokenIds.length === 1 ? 'item' : 'items'}
+                      <span>{formatAddress(group.root.creator)}</span>
+                      <span>•</span>
+                      <span>{group.versions.length} {group.versions.length === 1 ? 'version' : 'versions'}</span>
                     </div>
                   </div>
+                </div>
+                
+                {/* Versions Grid */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                  gap: 16
+                }}>
+                  {group.versions.map((scene) => (
+                    <div
+                      key={scene.tokenId}
+                      onClick={() => navigate(`/chamber/${scene.tokenId}`)}
+                      style={{
+                        background: 'white',
+                        borderRadius: '16px',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                        border: '1px solid #F1F5F9'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-4px)';
+                        e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.08)';
+                        e.currentTarget.style.borderColor = '#E2E8F0';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
+                        e.currentTarget.style.borderColor = '#F1F5F9';
+                      }}
+                    >
+                      {/* Thumbnail */}
+                      <div style={{
+                        width: '100%',
+                        aspectRatio: '1',
+                        background: 'linear-gradient(135deg, #F0F4F8 0%, #E2E8F0 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}>
+                        {scene.thumbnailUrl ? (
+                          <img
+                            src={scene.thumbnailUrl}
+                            alt={scene.name}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div style={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: '12px',
+                            background: 'linear-gradient(135deg, #E2E8F0 0%, #CBD5E0 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <Home size={20} color="#A0AEC0" />
+                          </div>
+                        )}
+                        {scene.remixable && (
+                          <div style={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            background: 'rgba(255, 255, 255, 0.95)',
+                            backdropFilter: 'blur(8px)',
+                            borderRadius: '6px',
+                            padding: '3px 6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 3,
+                            fontSize: 9,
+                            fontWeight: 500,
+                            color: '#667EEA',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                          }}>
+                            <Sparkles size={8} />
+                            <span>Remix</span>
+                          </div>
+                        )}
+                        <div style={{
+                          position: 'absolute',
+                          top: 8,
+                          left: 8,
+                          background: 'rgba(0, 0, 0, 0.7)',
+                          backdropFilter: 'blur(8px)',
+                          borderRadius: '6px',
+                          padding: '4px 8px',
+                          fontSize: 10,
+                          fontWeight: 600,
+                          color: 'white'
+                        }}>
+                          v{scene.version}
+                        </div>
+                      </div>
+
+                      {/* Info */}
+                      <div style={{
+                        padding: '12px'
+                      }}>
+                        <div style={{
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: '#2D3748',
+                          marginBottom: 8
+                        }}>
+                          Version {scene.version}
+                        </div>
+                        <div style={{
+                          fontSize: 11,
+                          color: '#718096'
+                        }}>
+                          {scene.objectTokenIds.length} {scene.objectTokenIds.length === 1 ? 'item' : 'items'}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
