@@ -1,8 +1,8 @@
 <div align="center">
   <div style="display: flex; align-items: center; justify-content: center; gap: 20px; padding: 40px 20px; background: linear-gradient(135deg, #fff8f5 0%, #f0e8ff 100%); border-radius: 16px; margin-bottom: 40px;">
     <!-- Logo placeholder - Replace with your logo image -->
-    <div style="width: 120px; height: 120px; background: #fff; border-radius: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,0.1);">
-      <img src="./client/public/logo.png" alt="LittleWorlds Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 24px;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size: 48px; color: #6b5d6b;\'>LW</span>'">
+    <div style="width: 12px; height: 12px; background: #fff; border-radius: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,0.1);">
+      <img src="https://github.com/user-attachments/assets/83f28db2-9a55-4ab7-910d-7e8199d57c55" alt="LittleWorlds Logo" style="width: 20%; height: 20%; object-fit: contain; border-radius: 24px;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size: 48px; color: #6b5d6b;\'>LW</span>'">
     </div>
     <div style="text-align: left;">
       <h1 style="margin: 0; font-size: 48px; font-weight: 600; color: #6b5d6b; background: linear-gradient(135deg, #ff6b9d 0%, #b894f5 50%, #6ba3ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">LittleWorlds</h1>
@@ -10,6 +10,7 @@
     </div>
   </div>
 </div>
+
 
 **LittleWorlds** is a Web3-powered 3D virtual room editor that enables users to create, own, and trade immersive 3D spaces and objects as on-chain NFTs. Every object and scene you create is truly yours—portable across platforms, verifiable on-chain, and tradeable in a decentralized marketplace.
 
@@ -357,24 +358,28 @@ The production build will be in `client/dist/`.
 ## Screenshots
 
 ### Landing Page
-![Landing Page](./client/public/Demo.png)
+
+![Landing Page](https://github.com/user-attachments/assets/10c474c6-5b7a-4a1c-ab7e-d7e3786f8832)
 
 *Welcome to LittleWorlds - Build worlds. Own them truly.*
 
 ### Room Editor
+
+<img width="1710" height="853" alt="Screenshot 2025-12-01 at 12 08 02" src="https://github.com/user-attachments/assets/232ce2c4-1b40-420a-80c2-e411bf293e24" />
+
 *Create and customize your 3D rooms with our intuitive editor*
 
 ### Object Library
+
+<img width="305" height="768" alt="Screenshot 2025-12-01 at 12 10 01" src="https://github.com/user-attachments/assets/0c803bb8-8ff4-4318-bc83-8c0f16b9f25f" />
+
 *Browse through furniture, decor, lighting, and more*
 
 ### Explore Marketplace
+
+<img width="1710" height="855" alt="Screenshot 2025-12-01 at 12 09 02" src="https://github.com/user-attachments/assets/14390d6e-8df3-4ef8-8aad-7ad23377ca0a" />
+
 *Discover rooms created by the community*
-
-### NFT Viewer
-*View your minted rooms and objects*
-
-### Wallet Integration
-*Seamless Web3 wallet connection*
 
 ---
 
@@ -419,10 +424,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Contact & Links
 
-- **Website**: [Coming Soon]
-- **Twitter**: [@LittleWorlds]
-- **Discord**: [Join our community]
-- **Documentation**: [Full docs coming soon]
+- **Website**: [LW](https://littleheaven.vercel.app/)
+- **Twitter**: [Coming Soon]
 
 ---
 
