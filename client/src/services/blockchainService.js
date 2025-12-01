@@ -157,10 +157,11 @@ class BlockchainService {
      * @param {string} params.thumbnailCID - IPFS CID of the thumbnail
      * @param {string} params.name - Scene name
      * @param {number[]} params.objectTokenIds - Array of object token IDs
+     * @param {boolean} params.remixable - Whether the scene can be remixed by others
      * @param {Function} onProgress - Progress callback
      * @returns {Promise<{tokenId: number, txHash: string}>}
      */
-    async mintScene({ sceneCID, metadataCID, thumbnailCID, name, objectTokenIds = [] }, onProgress) {
+    async mintScene({ sceneCID, metadataCID, thumbnailCID, name, objectTokenIds = [], remixable = false }, onProgress) {
         if (!this.sceneNFTContract) {
             throw new Error('SceneNFT contract not initialized');
         }
@@ -176,17 +177,12 @@ class BlockchainService {
             console.log('Thumbnail CID:', thumbnailCID);
             console.log('Name:', name);
             console.log('Object Token IDs:', objectTokenIds);
+            console.log('Remixable:', remixable);
 
             // Verify contract is accessible by calling a view function
             try {
                 const tokens = await this.sceneNFTContract.getCreatorTokens(address);
                 console.log('✅ Contract is accessible. Existing tokens:', tokens.length);
-
-                // Check contract owner
-                const contractOwner = await this.sceneNFTContract.owner();
-                console.log('Contract Owner:', contractOwner);
-                console.log('Your Address:', address);
-                console.log('Are you the owner?', contractOwner.toLowerCase() === address.toLowerCase());
             } catch (viewError) {
                 console.error('⚠️ Warning: Could not call view function:', viewError.message);
             }
@@ -218,7 +214,8 @@ class BlockchainService {
                         metadataCID,
                         thumbnailCID,
                         name,
-                        objectTokenIds
+                        objectTokenIds,
+                        remixable
                     );
                     console.log('✅ Gas estimate:', gasEstimate.toString());
                 } catch (gasError) {
@@ -237,7 +234,8 @@ class BlockchainService {
                             metadataCID,
                             thumbnailCID,
                             name,
-                            objectTokenIds
+                            objectTokenIds,
+                            remixable
                         );
                     } catch (staticError) {
                         console.error('❌ Static call error:', staticError);
@@ -255,7 +253,8 @@ class BlockchainService {
                     metadataCID,
                     thumbnailCID,
                     name,
-                    objectTokenIds
+                    objectTokenIds,
+                    remixable
                 );
             } catch (txError) {
                 console.error('❌ Error calling mintScene:', txError);
@@ -366,6 +365,7 @@ class BlockchainService {
                         version: Number(metadata.version),
                         createdAt: Number(metadata.createdAt),
                         creator: metadata.creator,
+                        remixable: metadata.remixable
                     };
                 })
             );
@@ -414,6 +414,208 @@ class BlockchainService {
      */
     getIPFSUrl(cid) {
         return `${IPFS_GATEWAY}${cid}`;
+    }
+
+    /**
+     * Get scene by token ID
+     * @param {number} tokenId - Token ID
+     * @returns {Promise<Object>} Scene metadata
+     */
+    async getSceneByTokenId(tokenId) {
+        if (!this.sceneNFTContract) {
+            throw new Error('SceneNFT contract not initialized');
+        }
+
+        try {
+            const metadata = await this.sceneNFTContract.getSceneMetadata(tokenId);
+            const owner = await this.sceneNFTContract.ownerOf(tokenId);
+
+            return {
+                tokenId: Number(tokenId),
+                name: metadata.name,
+                sceneCID: metadata.sceneCID,
+                metadataCID: metadata.metadataCID,
+                thumbnailCID: metadata.thumbnailCID,
+                creator: metadata.creator,
+                owner,
+                objectTokenIds: metadata.objectTokenIds.map(id => Number(id)),
+                version: Number(metadata.version),
+                createdAt: Number(metadata.createdAt),
+                createdAtDate: new Date(Number(metadata.createdAt) * 1000),
+                remixable: metadata.remixable
+            };
+        } catch (error) {
+            console.error('Error fetching scene by token ID:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get all scenes (fetches all token IDs up to totalSupply)
+     * @returns {Promise<Array>} Array of scene metadata
+     */
+    async getAllScenes() {
+        if (!this.sceneNFTContract) {
+            throw new Error('SceneNFT contract not initialized');
+        }
+
+        try {
+            const totalSupply = await this.sceneNFTContract.totalSupply();
+            const scenes = [];
+
+            for (let i = 0; i < Number(totalSupply); i++) {
+                try {
+                    const scene = await this.getSceneByTokenId(i);
+                    scenes.push(scene);
+                } catch (error) {
+                    // Token might not exist (burned or invalid), skip it
+                    console.warn(`Token ${i} not found, skipping...`);
+                }
+            }
+
+            return scenes;
+        } catch (error) {
+            console.error('Error fetching all scenes:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Create a new version of an existing scene
+     * @param {Object} params - Version parameters
+     * @param {number} params.parentTokenId - Token ID of the parent scene
+     * @param {string} params.sceneCID - IPFS CID of the updated scene JSON
+     * @param {string} params.metadataCID - IPFS CID of the updated metadata
+     * @param {string} params.thumbnailCID - IPFS CID of the updated thumbnail
+     * @param {number[]} params.objectTokenIds - Updated array of object token IDs
+     * @param {boolean} params.remixable - Updated remixable setting
+     * @param {Function} onProgress - Progress callback
+     * @returns {Promise<{tokenId: number, txHash: string}>}
+     */
+    async createSceneVersion({ parentTokenId, sceneCID, metadataCID, thumbnailCID, objectTokenIds = [], remixable = false }, onProgress) {
+        if (!this.sceneNFTContract) {
+            throw new Error('SceneNFT contract not initialized');
+        }
+
+        try {
+            const address = await this.signer.getAddress();
+
+            console.log('🔵 Creating Scene Version...');
+            console.log('Parent Token ID:', parentTokenId);
+            console.log('Scene CID:', sceneCID);
+            console.log('Remixable:', remixable);
+
+            onProgress?.({ status: 'pending', message: 'Waiting for transaction approval...' });
+
+            const tx = await this.sceneNFTContract.createVersion(
+                parentTokenId,
+                sceneCID,
+                metadataCID,
+                thumbnailCID,
+                objectTokenIds,
+                remixable
+            );
+
+            console.log('✅ Transaction sent:', tx.hash);
+
+            onProgress?.({ status: 'mining', message: 'Transaction submitted, waiting for confirmation...', txHash: tx.hash });
+
+            const receipt = await tx.wait();
+
+            // Extract token ID from event logs
+            const event = receipt.logs.find(log => {
+                try {
+                    const parsed = this.sceneNFTContract.interface.parseLog(log);
+                    return parsed.name === 'SceneVersioned';
+                } catch {
+                    return false;
+                }
+            });
+
+            let tokenId = null;
+            if (event) {
+                const parsed = this.sceneNFTContract.interface.parseLog(event);
+                tokenId = Number(parsed.args.newTokenId);
+            }
+
+            onProgress?.({ status: 'success', message: 'Chamber version created successfully!', tokenId, txHash: receipt.hash });
+
+            return { tokenId, txHash: receipt.hash };
+        } catch (error) {
+            console.error('Error creating scene version:', error);
+            onProgress?.({ status: 'error', message: error.message });
+            throw error;
+        }
+    }
+
+    /**
+     * Remix an existing scene
+     * @param {Object} params - Remix parameters
+     * @param {number} params.originalTokenId - Token ID of the original scene
+     * @param {string} params.sceneCID - IPFS CID of the remixed scene JSON
+     * @param {string} params.metadataCID - IPFS CID of the remixed metadata
+     * @param {string} params.thumbnailCID - IPFS CID of the remixed thumbnail
+     * @param {string} params.name - Name for the remixed scene
+     * @param {number[]} params.objectTokenIds - Array of object token IDs
+     * @param {boolean} params.remixable - Whether this remix can be remixed
+     * @param {Function} onProgress - Progress callback
+     * @returns {Promise<{tokenId: number, txHash: string}>}
+     */
+    async remixScene({ originalTokenId, sceneCID, metadataCID, thumbnailCID, name, objectTokenIds = [], remixable = false }, onProgress) {
+        if (!this.sceneNFTContract) {
+            throw new Error('SceneNFT contract not initialized');
+        }
+
+        try {
+            const address = await this.signer.getAddress();
+
+            console.log('🔵 Remixing Scene NFT...');
+            console.log('Original Token ID:', originalTokenId);
+            console.log('Remix Name:', name);
+            console.log('Remixable:', remixable);
+
+            onProgress?.({ status: 'pending', message: 'Waiting for transaction approval...' });
+
+            const tx = await this.sceneNFTContract.remixScene(
+                originalTokenId,
+                sceneCID,
+                metadataCID,
+                thumbnailCID,
+                name,
+                objectTokenIds,
+                remixable
+            );
+
+            console.log('✅ Transaction sent:', tx.hash);
+
+            onProgress?.({ status: 'mining', message: 'Transaction submitted, waiting for confirmation...', txHash: tx.hash });
+
+            const receipt = await tx.wait();
+
+            // Extract token ID from event logs
+            const event = receipt.logs.find(log => {
+                try {
+                    const parsed = this.sceneNFTContract.interface.parseLog(log);
+                    return parsed.name === 'SceneRemixed';
+                } catch {
+                    return false;
+                }
+            });
+
+            let tokenId = null;
+            if (event) {
+                const parsed = this.sceneNFTContract.interface.parseLog(event);
+                tokenId = Number(parsed.args.newTokenId);
+            }
+
+            onProgress?.({ status: 'success', message: 'Chamber remixed successfully!', tokenId, txHash: receipt.hash });
+
+            return { tokenId, txHash: receipt.hash };
+        } catch (error) {
+            console.error('Error remixing scene NFT:', error);
+            onProgress?.({ status: 'error', message: error.message });
+            throw error;
+        }
     }
 }
 

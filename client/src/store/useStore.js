@@ -40,6 +40,7 @@ const useStore = create((set, get) => ({
   selectedId: null,
   gridEnabled: true, // Enable grid snapping by default
   mode: 'edit', // 'edit' or 'view'
+  currentChamberTokenId: null, // Track the current chamber being edited (for versioning)
   // Room configuration - JSON structure
   roomConfig: DEFAULT_ROOM_CONFIG,
   // Performance settings
@@ -117,6 +118,14 @@ const useStore = create((set, get) => ({
       objects: sceneData.objects || [],
       roomConfig: sceneData.roomConfig || DEFAULT_ROOM_CONFIG
     });
+  },
+
+  setCurrentChamberTokenId: (tokenId) => {
+    set({ currentChamberTokenId: tokenId });
+  },
+
+  clearCurrentChamberTokenId: () => {
+    set({ currentChamberTokenId: null });
   },
 
   // Room configuration methods

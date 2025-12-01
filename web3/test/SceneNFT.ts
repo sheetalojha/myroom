@@ -18,8 +18,8 @@ describe("SceneNFT", function () {
 
   describe("Deployment", function () {
     it("Should set the right name and symbol", async function () {
-      expect(await sceneNFT.name()).to.equal("Life Scene NFT");
-      expect(await sceneNFT.symbol()).to.equal("LSCN");
+      expect(await sceneNFT.name()).to.equal("Chambers");
+      expect(await sceneNFT.symbol()).to.equal("CHMBR");
     });
 
     it("Should set the right owner", async function () {
@@ -64,7 +64,8 @@ describe("SceneNFT", function () {
         metadataCID,
         thumbnailCID,
         sceneName,
-        objectTokenIds
+        objectTokenIds,
+        true // remixable
       );
 
       await expect(tx)
@@ -82,7 +83,8 @@ describe("SceneNFT", function () {
         metadataCID,
         thumbnailCID,
         sceneName,
-        objectTokenIds
+        objectTokenIds,
+        true // remixable
       );
 
       const metadata = await sceneNFT.getSceneMetadata(0n);
@@ -102,7 +104,8 @@ describe("SceneNFT", function () {
         metadataCID,
         thumbnailCID,
         sceneName,
-        objectTokenIds
+        objectTokenIds,
+        true // remixable
       );
 
       const storedObjects = await sceneNFT.getSceneObjects(0n);
@@ -118,7 +121,8 @@ describe("SceneNFT", function () {
         metadataCID,
         thumbnailCID,
         sceneName,
-        objectTokenIds
+        objectTokenIds,
+        true // remixable
       );
 
       const tokenURI = await sceneNFT.tokenURI(0n);
@@ -132,7 +136,8 @@ describe("SceneNFT", function () {
         metadataCID,
         thumbnailCID,
         sceneName,
-        objectTokenIds
+        objectTokenIds,
+        true // remixable
       );
 
       const creatorTokens = await sceneNFT.getCreatorTokens(owner.address);
@@ -147,7 +152,8 @@ describe("SceneNFT", function () {
         metadataCID,
         thumbnailCID,
         sceneName,
-        []
+        [],
+        true // remixable
       );
 
       const storedObjects = await sceneNFT.getSceneObjects(0n);
@@ -182,7 +188,8 @@ describe("SceneNFT", function () {
         metadataCID,
         thumbnailCID,
         sceneName,
-        objectTokenIds
+        objectTokenIds,
+        true // remixable
       );
     });
 
@@ -195,7 +202,8 @@ describe("SceneNFT", function () {
         newSceneCID,
         newMetadataCID,
         newThumbnailCID,
-        newObjectTokenIds
+        newObjectTokenIds,
+        true // remixable
       );
 
       await expect(tx)
@@ -220,7 +228,8 @@ describe("SceneNFT", function () {
         newSceneCID,
         newMetadataCID,
         newThumbnailCID,
-        newObjectTokenIds
+        newObjectTokenIds,
+        true // remixable
       );
 
       const storedObjects = await sceneNFT.getSceneObjects(1n);
@@ -237,7 +246,8 @@ describe("SceneNFT", function () {
           newSceneCID,
           newMetadataCID,
           newThumbnailCID,
-          newObjectTokenIds
+          newObjectTokenIds,
+          true // remixable
         )
       ).to.be.revertedWith("Not the owner of parent token");
     });
@@ -245,11 +255,11 @@ describe("SceneNFT", function () {
     it("Should increment version number", async function () {
       await sceneNFT.connect(recipient).transferFrom(recipient.address, user.address, 0n);
       
-      await sceneNFT.connect(user).createVersion(0n, newSceneCID, newMetadataCID, newThumbnailCID, newObjectTokenIds);
+      await sceneNFT.connect(user).createVersion(0n, newSceneCID, newMetadataCID, newThumbnailCID, newObjectTokenIds, true);
       const version1 = await sceneNFT.getSceneMetadata(1n);
       expect(version1.version).to.equal(2n);
 
-      await sceneNFT.connect(user).createVersion(1n, newSceneCID, newMetadataCID, newThumbnailCID, newObjectTokenIds);
+      await sceneNFT.connect(user).createVersion(1n, newSceneCID, newMetadataCID, newThumbnailCID, newObjectTokenIds, true);
       const version2 = await sceneNFT.getSceneMetadata(2n);
       expect(version2.version).to.equal(3n);
       expect(version2.parentTokenId).to.equal(1n);
@@ -263,7 +273,7 @@ describe("SceneNFT", function () {
     const sceneName = "My Awesome Room";
 
     it("Should allow owner to burn token", async function () {
-      await sceneNFT.mintScene(recipient.address, sceneCID, metadataCID, thumbnailCID, sceneName, []);
+      await sceneNFT.mintScene(recipient.address, sceneCID, metadataCID, thumbnailCID, sceneName, [], true);
       expect(await sceneNFT.ownerOf(0n)).to.equal(recipient.address);
       
       await sceneNFT.connect(recipient).burn(0n);
@@ -276,6 +286,111 @@ describe("SceneNFT", function () {
         reverted = true;
       }
       expect(reverted).to.be.true;
+    });
+  });
+
+  describe("Remixing", function () {
+    const sceneCID = "QmScene123";
+    const metadataCID = "QmMetadata123";
+    const thumbnailCID = "QmThumbnail123";
+    const sceneName = "My Awesome Room";
+    const remixSceneCID = "QmRemixScene123";
+    const remixMetadataCID = "QmRemixMetadata123";
+    const remixThumbnailCID = "QmRemixThumbnail123";
+    const remixName = "My Remixed Room";
+    let objectTokenIds: bigint[];
+
+    beforeEach(async function () {
+      // Mint objects
+      await objectNFT.mintObject(owner.address, "QmObject1", "QmMeta1", "furniture", "chair");
+      objectTokenIds = [0n];
+
+      // Mint remixable scene
+      await sceneNFT.mintScene(
+        recipient.address,
+        sceneCID,
+        metadataCID,
+        thumbnailCID,
+        sceneName,
+        objectTokenIds,
+        true // remixable
+      );
+    });
+
+    it("Should allow remixing a remixable scene", async function () {
+      const tx = await sceneNFT.connect(user).remixScene(
+        0n,
+        remixSceneCID,
+        remixMetadataCID,
+        remixThumbnailCID,
+        remixName,
+        objectTokenIds,
+        false // remixable for remix
+      );
+
+      await expect(tx)
+        .to.emit(sceneNFT, "SceneRemixed")
+        .withArgs(1n, 0n, user.address, owner.address);
+
+      const remixMetadata = await sceneNFT.getSceneMetadata(1n);
+      expect(remixMetadata.sceneCID).to.equal(remixSceneCID);
+      expect(remixMetadata.name).to.equal(remixName);
+      expect(remixMetadata.creator).to.equal(user.address);
+      expect(remixMetadata.parentTokenId).to.equal(0n);
+      expect(remixMetadata.remixable).to.equal(false);
+    });
+
+    it("Should not allow remixing a non-remixable scene", async function () {
+      // Mint a non-remixable scene
+      await sceneNFT.mintScene(
+        recipient.address,
+        sceneCID,
+        metadataCID,
+        thumbnailCID,
+        "Non-remixable Room",
+        objectTokenIds,
+        false // not remixable
+      );
+
+      await expect(
+        sceneNFT.connect(user).remixScene(
+          1n,
+          remixSceneCID,
+          remixMetadataCID,
+          remixThumbnailCID,
+          remixName,
+          objectTokenIds,
+          true
+        )
+      ).to.be.revertedWith("Scene is not remixable");
+    });
+
+    it("Should set remixable flag correctly", async function () {
+      await sceneNFT.mintScene(
+        recipient.address,
+        sceneCID,
+        metadataCID,
+        thumbnailCID,
+        sceneName,
+        objectTokenIds,
+        true // remixable
+      );
+
+      const metadata = await sceneNFT.getSceneMetadata(0n);
+      expect(metadata.remixable).to.equal(true);
+
+      await sceneNFT.mintScene(
+        recipient.address,
+        sceneCID,
+        metadataCID,
+        thumbnailCID,
+        sceneName,
+        objectTokenIds,
+        false // not remixable
+      );
+
+      const metadata2 = await sceneNFT.getSceneMetadata(2n);
+      expect(metadata2.remixable).to.equal(false);
     });
   });
 });

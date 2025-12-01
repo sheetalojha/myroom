@@ -26,6 +26,7 @@ contract SceneNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
         uint256 createdAt;        // Timestamp of creation
         address creator;          // Original creator address
         uint256 parentTokenId;    // If this is a version, reference to parent (0 if original)
+        bool remixable;           // Whether this scene can be remixed by others
     }
     
     // Mapping from token ID to scene metadata
@@ -50,7 +51,14 @@ contract SceneNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
         uint256 version
     );
     
-    constructor() ERC721("Life Scene NFT", "LSCN") Ownable() {}
+    event SceneRemixed(
+        uint256 indexed newTokenId,
+        uint256 indexed originalTokenId,
+        address indexed remixer,
+        address originalCreator
+    );
+    
+    constructor() ERC721("Chambers", "CHMBR") Ownable() {}
     
     /**
      * @dev Mint a new scene NFT
@@ -60,6 +68,7 @@ contract SceneNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
      * @param thumbnailCID IPFS CID of the thumbnail image
      * @param name Name of the scene
      * @param objectTokenIds Array of ObjectNFT token IDs included in the scene
+     * @param remixable Whether this scene can be remixed by others
      * @return tokenId The ID of the newly minted token
      */
     function mintScene(
@@ -68,7 +77,8 @@ contract SceneNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
         string memory metadataCID,
         string memory thumbnailCID,
         string memory name,
-        uint256[] memory objectTokenIds
+        uint256[] memory objectTokenIds,
+        bool remixable
     ) public returns (uint256) {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
@@ -85,7 +95,8 @@ contract SceneNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
             version: 1,
             createdAt: block.timestamp,
             creator: msg.sender,
-            parentTokenId: 0
+            parentTokenId: 0,
+            remixable: remixable
         });
         
         _creatorTokens[msg.sender].push(tokenId);
@@ -102,6 +113,7 @@ contract SceneNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
      * @param metadataCID New IPFS CID for the updated metadata
      * @param thumbnailCID New IPFS CID for the updated thumbnail
      * @param objectTokenIds Updated array of ObjectNFT token IDs
+     * @param remixable Updated remixable setting
      * @return tokenId The ID of the new version token
      */
     function createVersion(
@@ -109,7 +121,8 @@ contract SceneNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
         string memory sceneCID,
         string memory metadataCID,
         string memory thumbnailCID,
-        uint256[] memory objectTokenIds
+        uint256[] memory objectTokenIds,
+        bool remixable
     ) public returns (uint256) {
         require(_ownerOf(parentTokenId) == msg.sender, "Not the owner of parent token");
         
@@ -131,12 +144,63 @@ contract SceneNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
             version: newVersion,
             createdAt: block.timestamp,
             creator: parentMetadata.creator,
-            parentTokenId: parentTokenId
+            parentTokenId: parentTokenId,
+            remixable: remixable
         });
         
         _creatorTokens[msg.sender].push(tokenId);
         
         emit SceneVersioned(tokenId, parentTokenId, msg.sender, newVersion);
+        
+        return tokenId;
+    }
+    
+    /**
+     * @dev Remix an existing scene (create a copy if remixable)
+     * @param originalTokenId The token ID of the scene to remix
+     * @param sceneCID New IPFS CID for the remixed scene JSON
+     * @param metadataCID New IPFS CID for the remixed metadata
+     * @param thumbnailCID New IPFS CID for the remixed thumbnail
+     * @param name Name for the remixed scene
+     * @param objectTokenIds Array of ObjectNFT token IDs for the remix
+     * @param remixable Whether this remix can be remixed by others
+     * @return tokenId The ID of the newly minted remix token
+     */
+    function remixScene(
+        uint256 originalTokenId,
+        string memory sceneCID,
+        string memory metadataCID,
+        string memory thumbnailCID,
+        string memory name,
+        uint256[] memory objectTokenIds,
+        bool remixable
+    ) public returns (uint256) {
+        SceneMetadata memory originalMetadata = sceneMetadata[originalTokenId];
+        require(_ownerOf(originalTokenId) != address(0), "Original scene does not exist");
+        require(originalMetadata.remixable, "Scene is not remixable");
+        
+        uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+        
+        _safeMint(msg.sender, tokenId);
+        _setTokenURI(tokenId, string(abi.encodePacked("ipfs://", metadataCID)));
+        
+        sceneMetadata[tokenId] = SceneMetadata({
+            sceneCID: sceneCID,
+            metadataCID: metadataCID,
+            thumbnailCID: thumbnailCID,
+            name: name,
+            objectTokenIds: objectTokenIds,
+            version: 1,
+            createdAt: block.timestamp,
+            creator: msg.sender,
+            parentTokenId: originalTokenId,
+            remixable: remixable
+        });
+        
+        _creatorTokens[msg.sender].push(tokenId);
+        
+        emit SceneRemixed(tokenId, originalTokenId, msg.sender, originalMetadata.creator);
         
         return tokenId;
     }

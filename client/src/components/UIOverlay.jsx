@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAccount } from 'wagmi';
+import { ethers } from 'ethers';
 import useStore from '../store/useStore';
 import { Leva } from 'leva';
 import { Registry, Categories } from './library/Registry';
@@ -6,6 +8,7 @@ import PerformanceNotification from './PerformanceNotification';
 import WalletConnect from './WalletConnect';
 import PublishPanel from './PublishPanel';
 import NFTLibrary from './NFTLibrary';
+import blockchainService from '../services/blockchainService';
 import { COLOR_THEMES, LIGHTING_PRESETS, WALL_COLOR_PRESETS, FLOOR_COLOR_PRESETS } from '../config/roomThemes';
 import {
     Armchair,
@@ -32,6 +35,7 @@ const CategoryIcons = {
 };
 
 const UIOverlay = () => {
+    const { isConnected } = useAccount();
     const addObject = useStore((state) => state.addObject);
     const objects = useStore((state) => state.objects);
     const loadScene = useStore((state) => state.loadScene);
@@ -40,14 +44,37 @@ const UIOverlay = () => {
     const selectedId = useStore((state) => state.selectedId);
     const performanceNotification = useStore((state) => state.performanceNotification);
     const setPerformanceNotification = useStore((state) => state.setPerformanceNotification);
+    const currentChamberTokenId = useStore((state) => state.currentChamberTokenId);
 
     const [activeCategory, setActiveCategory] = useState('Furniture');
     const [libraryOpen, setLibraryOpen] = useState(true);
     const [customizeOpen, setCustomizeOpen] = useState(false);
     const [showNFTLibrary, setShowNFTLibrary] = useState(false);
+    const [chamberName, setChamberName] = useState('My Room');
 
     const roomConfig = useStore((state) => state.roomConfig);
     const setColorTheme = useStore((state) => state.setColorTheme);
+    
+    // Fetch chamber name if editing an existing chamber
+    useEffect(() => {
+        const fetchChamberName = async () => {
+            if (currentChamberTokenId !== null && isConnected && window.ethereum) {
+                try {
+                    const provider = new ethers.BrowserProvider(window.ethereum);
+                    await blockchainService.initialize(provider);
+                    const metadata = await blockchainService.getSceneByTokenId(currentChamberTokenId);
+                    setChamberName(metadata.name || 'My Room');
+                } catch (error) {
+                    console.error('Error fetching chamber name:', error);
+                    setChamberName('My Room');
+                }
+            } else {
+                setChamberName('My Room');
+            }
+        };
+        
+        fetchChamberName();
+    }, [currentChamberTokenId, isConnected]);
     const setLighting = useStore((state) => state.setLighting);
     const updateRoomConfig = useStore((state) => state.updateRoomConfig);
 
@@ -787,9 +814,13 @@ const UIOverlay = () => {
                     fontSize: 11,
                     fontWeight: 500,
                     color: '#6B7280',
-                    letterSpacing: '-0.01em'
+                    letterSpacing: '-0.01em',
+                    maxWidth: 200,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
                 }}>
-                    My Room
+                    {chamberName}
                 </div>
             </div>
 

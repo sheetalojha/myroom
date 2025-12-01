@@ -1,29 +1,28 @@
 import React from 'react';
-import Scene from './components/Scene';
-import UIOverlay from './components/UIOverlay';
-import useStore from './store/useStore';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { wagmiConfig } from './config/web3Config';
+import LandingPage from './pages/LandingPage';
+import EditorPage from './pages/EditorPage';
+import ExplorePage from './pages/ExplorePage';
+import ChamberViewerPage from './pages/ChamberViewerPage';
 
 const queryClient = new QueryClient();
 
 function App() {
-  const roomConfig = useStore((state) => state.roomConfig);
-  const background = roomConfig?.background?.gradient || 'radial-gradient(circle at center, #E6F2FF 0%, #B3D9FF 50%, #87CEEB 100%)';
-  
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <div style={{ 
-          width: '100vw', 
-          height: '100vh', 
-          position: 'relative',
-          background: background
-        }}>
-          <Scene />
-          <UIOverlay />
-        </div>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/editor" element={<EditorPage />} />
+            <Route path="/explore" element={<ExplorePage />} />
+            <Route path="/chamber/:tokenId" element={<ChamberViewerPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
       </QueryClientProvider>
     </WagmiProvider>
   );

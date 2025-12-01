@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
 import { ethers } from 'ethers';
 import { Package, Image as ImageIcon, Loader, Download, X, Home } from 'lucide-react';
@@ -7,8 +8,11 @@ import { deserializeScene } from '../utils/sceneSerializer';
 import useStore from '../store/useStore';
 
 const NFTLibrary = ({ isOpen, onClose }) => {
+    const navigate = useNavigate();
     const { address, isConnected } = useAccount();
     const loadScene = useStore((state) => state.loadScene);
+    const setMode = useStore((state) => state.setMode);
+    const setCurrentChamberTokenId = useStore((state) => state.setCurrentChamberTokenId);
 
     const [objects, setObjects] = useState([]);
     const [scenes, setScenes] = useState([]);
@@ -43,19 +47,26 @@ const NFTLibrary = ({ isOpen, onClose }) => {
 
     const handleLoadScene = async (scene) => {
         try {
+            // User owns this chamber, so load it directly in editor
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            await blockchainService.initialize(provider);
+            
             // Fetch scene data from IPFS
             const sceneData = await blockchainService.fetchSceneFromIPFS(scene.sceneCID);
-
-            // Deserialize scene data (now returns { objects, roomConfig })
-            const deserializedData = deserializeScene(sceneData);
             
-            // Load scene with both objects and roomConfig
+            // Deserialize and load scene
+            const deserializedData = deserializeScene(sceneData);
             loadScene(deserializedData);
-
+            setMode('edit');
+            // Set the current chamber token ID for versioning
+            setCurrentChamberTokenId(scene.tokenId);
+            
+            // Navigate to editor
+            navigate('/editor');
             onClose();
         } catch (error) {
-            console.error('Error loading scene:', error);
-            alert('Failed to load scene from IPFS');
+            console.error('Error loading chamber:', error);
+            alert('Failed to load chamber');
         }
     };
 
@@ -111,7 +122,7 @@ const NFTLibrary = ({ isOpen, onClose }) => {
                             color: '#1A202C',
                             letterSpacing: '-0.01em'
                         }}>
-                            My Rooms
+                            My Chambers
                         </h2>
                     </div>
                     <button
@@ -178,7 +189,7 @@ const NFTLibrary = ({ isOpen, onClose }) => {
                         }}
                     >
                         <ImageIcon size={14} />
-                        Rooms ({scenes.length})
+                        Chambers ({scenes.length})
                     </button>
                     <button
                         onClick={() => setActiveTab('objects')}
@@ -236,7 +247,7 @@ const NFTLibrary = ({ isOpen, onClose }) => {
                                 fontWeight: 500,
                                 color: '#6B7280'
                             }}>
-                                Loading your rooms...
+                                Loading your chambers...
                             </p>
                         </div>
                     ) : (
@@ -265,13 +276,13 @@ const NFTLibrary = ({ isOpen, onClose }) => {
                                                 color: '#6B7280',
                                                 marginBottom: 4
                                             }}>
-                                                No rooms yet
+                                                No chambers yet
                                             </p>
                                             <small style={{
                                                 fontSize: 12,
                                                 color: '#9CA3AF'
                                             }}>
-                                                Publish a scene to create your first room
+                                                Publish a chamber to create your first one
                                             </small>
                                         </div>
                                     ) : (
@@ -319,7 +330,7 @@ const NFTLibrary = ({ isOpen, onClose }) => {
                                                         fontWeight: 600,
                                                         color: '#1A202C'
                                                     }}>
-                                                        {scene.name || `Room #${scene.tokenId}`}
+                                                        {scene.name || `Chamber #${scene.tokenId}`}
                                                     </div>
                                                     <div style={{
                                                         display: 'flex',
@@ -376,7 +387,7 @@ const NFTLibrary = ({ isOpen, onClose }) => {
                                                         }}
                                                     >
                                                         <Download size={12} />
-                                                        Load Room
+                                                        View Chamber
                                                     </button>
                                                 </div>
                                             </div>
