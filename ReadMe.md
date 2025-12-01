@@ -1,0 +1,2 @@
+# Little Heaven
+Imagine having your own personal 3D room on the web where you can show off the things you love. That’s exactly Little Heaven. In just a couple of taps, you can scan your favorite real-world items—like a cool collectible or a piece of art—and drop them into your virtual room. Then you can invite your friends to visit, explore, and interact with your space. It’s like Myspace meets the metaverse, but super simple and fun. And because everything is an NFT, you truly own your digital room and all the items in it.
