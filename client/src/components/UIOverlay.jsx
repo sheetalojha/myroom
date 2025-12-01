@@ -9,6 +9,7 @@ import PerformanceNotification from './PerformanceNotification';
 import WalletConnect from './WalletConnect';
 import PublishPanel from './PublishPanel';
 import NFTLibrary from './NFTLibrary';
+import ObjectTransformPanel from './ObjectTransformPanel';
 import blockchainService from '../services/blockchainService';
 import { COLOR_THEMES, LIGHTING_PRESETS, WALL_COLOR_PRESETS, FLOOR_COLOR_PRESETS } from '../config/roomThemes';
 import {
@@ -82,6 +83,14 @@ const UIOverlay = () => {
     const updateRoomConfig = useStore((state) => state.updateRoomConfig);
 
     const isEditMode = mode === 'edit';
+    const selectObject = useStore((state) => state.selectObject);
+
+    // Close customize panel when object is selected
+    useEffect(() => {
+        if (selectedId && customizeOpen) {
+            setCustomizeOpen(false);
+        }
+    }, [selectedId, customizeOpen]);
 
     const handleSave = () => {
         const data = JSON.stringify({ objects, roomConfig });
@@ -234,9 +243,17 @@ const UIOverlay = () => {
                             {libraryOpen ? <X size={14} color="#1A202C" /> : <Menu size={14} color="#1A202C" />}
                         </button>
                         <button
-                            onClick={() => setCustomizeOpen(!customizeOpen)}
+                            onClick={() => {
+                                if (selectedId) {
+                                    // If object is selected, deselect it (transform panel will close)
+                                    selectObject(null);
+                                } else {
+                                    // Toggle customize panel
+                                    setCustomizeOpen(!customizeOpen);
+                                }
+                            }}
                             style={{
-                                background: customizeOpen ? '#1A202C' : 'rgba(255, 255, 255, 0.95)',
+                                background: (customizeOpen || selectedId) ? '#1A202C' : 'rgba(255, 255, 255, 0.95)',
                                 backdropFilter: 'blur(16px)',
                                 border: '1px solid rgba(255, 255, 255, 0.3)',
                                 borderRadius: '20px',
@@ -250,17 +267,17 @@ const UIOverlay = () => {
                                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                             }}
                             onMouseEnter={(e) => {
-                                if (!customizeOpen) {
+                                if (!customizeOpen && !selectedId) {
                                     e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
                                 }
                             }}
                             onMouseLeave={(e) => {
-                                if (!customizeOpen) {
+                                if (!customizeOpen && !selectedId) {
                                     e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
                                 }
                             }}
                         >
-                            <Palette size={14} color={customizeOpen ? "#FFFFFF" : "#1A202C"} />
+                            <Palette size={14} color={(customizeOpen || selectedId) ? "#FFFFFF" : "#1A202C"} />
                         </button>
                     </>
                 )}
@@ -385,8 +402,13 @@ const UIOverlay = () => {
                 </div>
             )}
 
-            {/* Right Sidebar - Customization Panel - only in edit mode */}
-            {isEditMode && customizeOpen && (
+            {/* Right Sidebar - Object Transform Panel - only in edit mode when object is selected */}
+            {isEditMode && selectedId && (
+                <ObjectTransformPanel onClose={() => selectObject(null)} />
+            )}
+
+            {/* Right Sidebar - Customization Panel - only in edit mode when no object selected */}
+            {isEditMode && customizeOpen && !selectedId && (
                 <div style={{
                     position: 'absolute',
                     top: 72,
@@ -887,8 +909,8 @@ const UIOverlay = () => {
                 </div>
             )}
 
-            {/* Leva Panel (Properties) - only in edit mode when object selected */}
-            {isEditMode && selectedId && !customizeOpen && (
+            {/* Leva Panel (Properties) - only in edit mode when object selected and transform panel not shown */}
+            {isEditMode && selectedId && false && (
                 <div style={{
                     position: 'absolute',
                     top: 52,
