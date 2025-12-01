@@ -216,6 +216,161 @@ export const COLOR_THEMES = {
       color2: '#7A9E69',
       style: 'wood'
     }
+  },
+  cloud: {
+    name: 'Cloud',
+    background: {
+      type: 'gradient',
+      colors: ['#FFFFFF', '#F5F5F5', '#E8E8E8'],
+      gradient: 'radial-gradient(circle at center, #FFFFFF 0%, #F5F5F5 50%, #E8E8E8 100%)'
+    },
+    leftWall: {
+      color: '#F0F0F0',
+      topColor: '#F8F8F8',
+      visible: true,
+      style: 'tint'
+    },
+    rightWall: {
+      color: '#F5F5F5',
+      topColor: '#FAFAFA',
+      visible: true,
+      style: 'tint'
+    },
+    backWall: {
+      color: '#F0F0F0',
+      topColor: '#F8F8F8',
+      visible: true,
+      style: 'tint'
+    },
+    floor: {
+      color: '#E0E0E0',
+      color2: '#E8E8E8',
+      style: 'wood'
+    }
+  },
+  lavender: {
+    name: 'Lavender',
+    background: {
+      type: 'gradient',
+      colors: ['#F5F0FF', '#E8D5FF', '#D4B3FF'],
+      gradient: 'radial-gradient(circle at center, #F5F0FF 0%, #E8D5FF 50%, #D4B3FF 100%)'
+    },
+    leftWall: {
+      color: '#E8D5FF',
+      topColor: '#F0E5FF',
+      visible: true,
+      style: 'tint'
+    },
+    rightWall: {
+      color: '#E0D0FF',
+      topColor: '#EDE0FF',
+      visible: true,
+      style: 'tint'
+    },
+    backWall: {
+      color: '#E8D5FF',
+      topColor: '#F0E5FF',
+      visible: true,
+      style: 'tint'
+    },
+    floor: {
+      color: '#C9A8E8',
+      color2: '#D4B3F0',
+      style: 'wood'
+    }
+  },
+  mint: {
+    name: 'Mint',
+    background: {
+      type: 'gradient',
+      colors: ['#F0FFF4', '#D4F4E0', '#B8E8CC'],
+      gradient: 'radial-gradient(circle at center, #F0FFF4 0%, #D4F4E0 50%, #B8E8CC 100%)'
+    },
+    leftWall: {
+      color: '#D4F4E0',
+      topColor: '#E0F8E8',
+      visible: true,
+      style: 'tint'
+    },
+    rightWall: {
+      color: '#C8F0D8',
+      topColor: '#D8F4E4',
+      visible: true,
+      style: 'tint'
+    },
+    backWall: {
+      color: '#D4F4E0',
+      topColor: '#E0F8E8',
+      visible: true,
+      style: 'tint'
+    },
+    floor: {
+      color: '#A8D8C0',
+      color2: '#B8E8D0',
+      style: 'wood'
+    }
+  },
+  peach: {
+    name: 'Peach',
+    background: {
+      type: 'gradient',
+      colors: ['#FFF5F0', '#FFE8D8', '#FFDCC0'],
+      gradient: 'radial-gradient(circle at center, #FFF5F0 0%, #FFE8D8 50%, #FFDCC0 100%)'
+    },
+    leftWall: {
+      color: '#FFE8D8',
+      topColor: '#FFF0E8',
+      visible: true,
+      style: 'tint'
+    },
+    rightWall: {
+      color: '#FFE0D0',
+      topColor: '#FFEDE0',
+      visible: true,
+      style: 'tint'
+    },
+    backWall: {
+      color: '#FFE8D8',
+      topColor: '#FFF0E8',
+      visible: true,
+      style: 'tint'
+    },
+    floor: {
+      color: '#FFC8A0',
+      color2: '#FFD4B0',
+      style: 'wood'
+    }
+  },
+  sky: {
+    name: 'Sky',
+    background: {
+      type: 'gradient',
+      colors: ['#F0F8FF', '#E0F0FF', '#D0E8FF'],
+      gradient: 'radial-gradient(circle at center, #F0F8FF 0%, #E0F0FF 50%, #D0E8FF 100%)'
+    },
+    leftWall: {
+      color: '#E0F0FF',
+      topColor: '#E8F4FF',
+      visible: true,
+      style: 'tint'
+    },
+    rightWall: {
+      color: '#D8ECFF',
+      topColor: '#E0F0FF',
+      visible: true,
+      style: 'tint'
+    },
+    backWall: {
+      color: '#E0F0FF',
+      topColor: '#E8F4FF',
+      visible: true,
+      style: 'tint'
+    },
+    floor: {
+      color: '#B0D0E8',
+      color2: '#C0D8F0',
+      style: 'wood'
+    }
   }
 };
 
@@ -287,7 +442,10 @@ export const DEFAULT_ROOM_CONFIG = {
   colorTheme: 'ocean', // Default to ocean (current bluish bg)
   lighting: 'medium',
   background: COLOR_THEMES.ocean.background,
-  leftWall: COLOR_THEMES.ocean.leftWall,
+  leftWall: {
+    ...COLOR_THEMES.ocean.leftWall,
+    visible: false // Left wall disabled by default
+  },
   rightWall: COLOR_THEMES.ocean.rightWall,
   backWall: COLOR_THEMES.ocean.backWall,
   floor: COLOR_THEMES.ocean.floor
