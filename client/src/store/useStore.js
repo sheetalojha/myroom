@@ -40,7 +40,7 @@ const useStore = create((set, get) => ({
   selectedId: null,
   gridEnabled: true, // Enable grid snapping by default
   mode: 'edit', // 'edit' or 'view'
-  currentChamberTokenId: null, // Track the current chamber being edited (for versioning)
+  currentChamberTokenId: null, // Track the current littleworld being edited (for versioning)
   // Room configuration - JSON structure
   roomConfig: DEFAULT_ROOM_CONFIG,
   // Performance settings

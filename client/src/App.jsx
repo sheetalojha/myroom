@@ -6,7 +6,7 @@ import { wagmiConfig } from './config/web3Config';
 import LandingPage from './pages/LandingPage';
 import EditorPage from './pages/EditorPage';
 import ExplorePage from './pages/ExplorePage';
-import ChamberViewerPage from './pages/ChamberViewerPage';
+import LittleWorldViewerPage from './pages/LittleWorldViewerPage';
 
 const queryClient = new QueryClient();
 
@@ -19,7 +19,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/editor" element={<EditorPage />} />
             <Route path="/explore" element={<ExplorePage />} />
-            <Route path="/chamber/:tokenId" element={<ChamberViewerPage />} />
+            <Route path="/littleworld/:tokenId" element={<LittleWorldViewerPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>

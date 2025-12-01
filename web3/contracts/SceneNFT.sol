@@ -58,7 +58,7 @@ contract SceneNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
         address originalCreator
     );
     
-    constructor() ERC721("Chambers", "CHMBR") Ownable() {}
+    constructor() ERC721("LittleWorlds", "CHMBR") Ownable() {}
     
     /**
      * @dev Mint a new scene NFT

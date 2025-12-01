@@ -113,20 +113,20 @@ const PublishPanel = () => {
             return;
         }
         
-        // Show dialog to get chamber name and remixable setting for new chambers
+        // Show dialog to get littleworld name and remixable setting for new littleworlds
         if (!showPublishDialog) {
             setShowPublishDialog(true);
             return;
         }
         
         if (!chamberName.trim()) {
-            setPublishStatus({ status: 'error', message: 'Please enter a chamber name' });
+            setPublishStatus({ status: 'error', message: 'Please enter a littleworld name' });
             return;
         }
 
         setIsPublishing(true);
         setPublishType('scene');
-        setPublishStatus({ status: 'uploading', message: 'Preparing chamber for upload...' });
+        setPublishStatus({ status: 'uploading', message: 'Preparing littleworld for upload...' });
 
         try {
             // Initialize blockchain service
@@ -153,7 +153,7 @@ const PublishPanel = () => {
             // Upload Metadata
             const metadata = generateSceneMetadata({
                 name: chamberName.trim(),
-                description: 'A chamber created with Chambers',
+                description: 'A littleworld created with LittleWorlds',
                 sceneCID: sceneCID,
                 thumbnailCID: thumbnailCID,
                 objectCount: objects.length,
@@ -165,7 +165,7 @@ const PublishPanel = () => {
 
             const metadataCID = await lighthouseService.uploadJSON(metadata, 'metadata.json');
 
-            setPublishStatus({ status: 'minting', message: 'Minting Chamber NFT...' });
+            setPublishStatus({ status: 'minting', message: 'Minting LittleWorld NFT...' });
 
             // Mint Scene NFT
             const result = await blockchainService.mintScene(
@@ -184,7 +184,7 @@ const PublishPanel = () => {
 
             setPublishStatus({
                 status: 'success',
-                message: 'Chamber published successfully!',
+                message: 'LittleWorld published successfully!',
                 tokenId: result.tokenId,
                 txHash: result.txHash,
             });
@@ -198,7 +198,7 @@ const PublishPanel = () => {
             console.error('Publishing error:', error);
             setPublishStatus({
                 status: 'error',
-                message: error.message || 'Failed to publish chamber',
+                message: error.message || 'Failed to publish littleworld',
             });
         } finally {
             setTimeout(() => {
@@ -213,13 +213,13 @@ const PublishPanel = () => {
         
         if (currentChamberTokenId === null || currentChamberTokenId === undefined) {
             console.error('❌ No currentChamberTokenId');
-            setPublishStatus({ status: 'error', message: 'No chamber loaded. Please load a chamber first.' });
+            setPublishStatus({ status: 'error', message: 'No littleworld loaded. Please load a littleworld first.' });
             return;
         }
         
         if (objects.length === 0) {
             console.error('❌ No objects to save');
-            setPublishStatus({ status: 'error', message: 'Add objects to your chamber before saving.' });
+            setPublishStatus({ status: 'error', message: 'Add objects to your littleworld before saving.' });
             return;
         }
         
@@ -298,7 +298,7 @@ const PublishPanel = () => {
                 txHash: result.txHash,
             });
 
-            // Update current chamber token ID to the new version
+            // Update current littleworld token ID to the new version
             setCurrentChamberTokenId(result.tokenId);
 
         } catch (error) {
@@ -413,7 +413,7 @@ const PublishPanel = () => {
                         }
                     }}
                     disabled={objects.length === 0 || isPublishing}
-                    title={objects.length === 0 ? 'Add objects to chamber first' : isUpdatingVersion ? 'Save as new version' : 'Publish entire chamber as NFT'}
+                    title={objects.length === 0 ? 'Add objects to littleworld first' : isUpdatingVersion ? 'Save as new version' : 'Publish entire littleworld as NFT'}
                     style={{
                         ...buttonBaseStyle,
                         opacity: (objects.length === 0 || isPublishing) ? 0.5 : 1,
@@ -431,11 +431,11 @@ const PublishPanel = () => {
                     }}
                 >
                     <Upload size={12} />
-                    {isUpdatingVersion ? 'Save Version' : 'Publish Chamber'}
+                    {isUpdatingVersion ? 'Save Version' : 'Publish LittleWorld'}
                 </button>
             </div>
 
-            {/* Publish Chamber Dialog */}
+            {/* Publish LittleWorld Dialog */}
             {showPublishDialog && (
                 <div style={{
                     position: 'absolute',
@@ -459,7 +459,7 @@ const PublishPanel = () => {
                         color: '#1A202C',
                         marginBottom: 12
                     }}>
-                        {isUpdatingVersion ? 'Save New Version' : 'Publish Chamber'}
+                        {isUpdatingVersion ? 'Save New Version' : 'Publish LittleWorld'}
                     </div>
                     <div style={{
                         display: 'flex',
@@ -475,13 +475,13 @@ const PublishPanel = () => {
                                 color: '#6B7280',
                                 marginBottom: 6
                             }}>
-                                Chamber Name
+                                LittleWorld Name
                             </label>
                             <input
                                 type="text"
                                 value={chamberName}
                                 onChange={(e) => setChamberName(e.target.value)}
-                                placeholder="My Awesome Chamber"
+                                placeholder="My Awesome LittleWorld"
                                 style={{
                                     width: '100%',
                                     padding: '8px 12px',
@@ -521,7 +521,7 @@ const PublishPanel = () => {
                                 cursor: 'pointer',
                                 userSelect: 'none'
                             }}>
-                                Allow others to remix this chamber
+                                Allow others to remix this littleworld
                             </label>
                         </div>
                         <div style={{

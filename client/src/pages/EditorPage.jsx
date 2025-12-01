@@ -14,7 +14,7 @@ const EditorPage = () => {
     // Set to edit mode when editor loads
     setMode('edit');
     // Only clear currentChamberTokenId if we're starting fresh (no objects loaded)
-    // This allows versioning to work when editing an existing chamber
+    // This allows versioning to work when editing an existing littleworld
     const objects = useStore.getState().objects;
     if (objects.length === 0 && currentChamberTokenId !== null) {
       clearCurrentChamberTokenId();

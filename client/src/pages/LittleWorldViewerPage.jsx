@@ -12,7 +12,7 @@ import lighthouseService from '../services/lighthouseService';
 import { generateSceneMetadata } from '../utils/metadataUtils';
 import { generateSceneThumbnail } from '../utils/glbExporter';
 
-const ChamberViewerPage = () => {
+const LittleWorldViewerPage = () => {
   const { tokenId } = useParams();
   const navigate = useNavigate();
   const { isConnected, address } = useAccount();
@@ -35,7 +35,7 @@ const ChamberViewerPage = () => {
   }, [isConnected, tokenId]);
 
   useEffect(() => {
-    // Set to view mode when chamber is loaded
+    // Set to view mode when littleworld is loaded
     setMode('view');
   }, []);
 
@@ -44,7 +44,7 @@ const ChamberViewerPage = () => {
     setError(null);
     try {
       if (!window.ethereum) {
-        throw new Error('Please install a wallet extension to view chambers');
+        throw new Error('Please install a wallet extension to view littleworlds');
       }
       
       const provider = new ethers.BrowserProvider(window.ethereum);
@@ -55,17 +55,17 @@ const ChamberViewerPage = () => {
 
       setSceneMetadata(metadata);
 
-      // Check if user owns this chamber - if yes, redirect to editor
+      // Check if user owns this littleworld - if yes, redirect to editor
       if (isConnected && address && metadata.owner && 
           metadata.owner.toLowerCase() === address.toLowerCase()) {
-        // User owns this chamber, load in editor
+        // User owns this littleworld, load in editor
         const sceneData = await blockchainService.fetchSceneFromIPFS(metadata.sceneCID);
         const deserializedData = deserializeScene(sceneData);
         loadScene(deserializedData);
         setMode('edit');
-        // Set the current chamber token ID for versioning
+        // Set the current littleworld token ID for versioning
         setCurrentChamberTokenId(Number(tokenId));
-        // Navigate to editor with the chamber loaded
+        // Navigate to editor with the littleworld loaded
         navigate('/editor');
         return;
       }
@@ -78,8 +78,8 @@ const ChamberViewerPage = () => {
       loadScene(deserializedData);
 
     } catch (error) {
-      console.error('Error loading chamber:', error);
-      setError(error.message || 'Failed to load chamber');
+      console.error('Error loading littleworld:', error);
+      setError(error.message || 'Failed to load littleworld');
     } finally {
       setLoading(false);
     }
@@ -110,11 +110,11 @@ const ChamberViewerPage = () => {
       } catch (feeError) {
         console.error('Fee payment error:', feeError);
         // Continue anyway - fee payment is optional for now
-        setRemixStatus({ status: 'uploading', message: 'Uploading remixed chamber...' });
+        setRemixStatus({ status: 'uploading', message: 'Uploading remixed littleworld...' });
       }
 
       // Serialize current scene state
-      setRemixStatus({ status: 'uploading', message: 'Uploading remixed chamber...' });
+      setRemixStatus({ status: 'uploading', message: 'Uploading remixed littleworld...' });
       const sceneData = serializeScene(objects, roomConfig);
       const sceneCID = await lighthouseService.uploadJSON(sceneData, 'scene.json');
 
@@ -140,7 +140,7 @@ const ChamberViewerPage = () => {
 
       const metadataCID = await lighthouseService.uploadJSON(metadata, 'metadata.json');
 
-      setRemixStatus({ status: 'minting', message: 'Minting remixed chamber...' });
+      setRemixStatus({ status: 'minting', message: 'Minting remixed littleworld...' });
 
       // Remix the scene
       const result = await blockchainService.remixScene(
@@ -160,7 +160,7 @@ const ChamberViewerPage = () => {
 
       setRemixStatus({
         status: 'success',
-        message: 'Chamber remixed successfully!',
+        message: 'LittleWorld remixed successfully!',
         tokenId: result.tokenId,
         txHash: result.txHash
       });
@@ -177,10 +177,10 @@ const ChamberViewerPage = () => {
       }, 1500);
 
     } catch (error) {
-      console.error('Error remixing chamber:', error);
+      console.error('Error remixing littleworld:', error);
       setRemixStatus({
         status: 'error',
-        message: error.message || 'Failed to remix chamber'
+        message: error.message || 'Failed to remix littleworld'
       });
     } finally {
       setRemixing(false);
@@ -222,7 +222,7 @@ const ChamberViewerPage = () => {
           }}
         />
         <p style={{ fontSize: 16, fontWeight: 500, color: '#6B7280' }}>
-          Loading chamber...
+          Loading littleworld...
         </p>
         <style>{`
           @keyframes spin {
@@ -327,7 +327,7 @@ const ChamberViewerPage = () => {
               margin: 0,
               marginBottom: 4
             }}>
-              {sceneMetadata?.name || `Chamber #${tokenId}`}
+              {sceneMetadata?.name || `LittleWorld #${tokenId}`}
             </h1>
             <div style={{
               display: 'flex',
@@ -372,7 +372,7 @@ const ChamberViewerPage = () => {
           alignItems: 'center',
           gap: 12
         }}>
-          {/* Show remix button if chamber is remixable AND user is NOT the owner */}
+          {/* Show remix button if littleworld is remixable AND user is NOT the owner */}
           {sceneMetadata?.remixable && isConnected && sceneMetadata?.owner && 
            address && sceneMetadata.owner.toLowerCase() !== address.toLowerCase() && (
             <button
@@ -479,4 +479,4 @@ const ChamberViewerPage = () => {
   );
 };
 
-export default ChamberViewerPage;
+export default LittleWorldViewerPage;

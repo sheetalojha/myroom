@@ -56,7 +56,7 @@ const NFTLibrary = ({ isOpen, onClose }) => {
         
         const nameGroups = new Map();
         scenesList.forEach(scene => {
-            const name = scene.name || `Chamber #${scene.tokenId}`;
+            const name = scene.name || `LittleWorld #${scene.tokenId}`;
             if (!nameGroups.has(name)) {
                 nameGroups.set(name, []);
             }
@@ -157,8 +157,8 @@ const NFTLibrary = ({ isOpen, onClose }) => {
             navigate('/editor');
             onClose();
         } catch (error) {
-            console.error('Error loading chamber:', error);
-            alert('Failed to load chamber: ' + (error.message || 'Unknown error'));
+            console.error('Error loading littleworld:', error);
+            alert('Failed to load littleworld: ' + (error.message || 'Unknown error'));
         } finally {
             setLoading(false);
         }
@@ -217,7 +217,7 @@ const NFTLibrary = ({ isOpen, onClose }) => {
                         fontWeight: 600,
                         color: '#111827',
                     }}>
-                        My Chambers
+                        My LittleWorlds
                     </h2>
                     <button
                         type="button"
@@ -283,7 +283,7 @@ const NFTLibrary = ({ isOpen, onClose }) => {
                         }}
                     >
                         <ImageIcon size={16} />
-                        Chambers ({scenes.length})
+                        LittleWorlds ({scenes.length})
                     </button>
                     <button
                         type="button"
@@ -361,7 +361,7 @@ const NFTLibrary = ({ isOpen, onClose }) => {
                                                 fontSize: '14px',
                                                 color: '#6b7280',
                                             }}>
-                                                No chambers yet
+                                                No littleworlds yet
                                             </p>
                                         </div>
                                     ) : (
@@ -374,7 +374,7 @@ const NFTLibrary = ({ isOpen, onClose }) => {
                                                     overflow: 'hidden',
                                                 }}
                                             >
-                                                {/* Chamber Header */}
+                                                {/* LittleWorld Header */}
                                                 <div style={{
                                                     padding: '16px',
                                                     borderBottom: '1px solid #e5e7eb',
@@ -386,7 +386,7 @@ const NFTLibrary = ({ isOpen, onClose }) => {
                                                         color: '#111827',
                                                         marginBottom: 4,
                                                     }}>
-                                                        {group.root.name || `Chamber #${group.root.tokenId}`}
+                                                        {group.root.name || `LittleWorld #${group.root.tokenId}`}
                                                     </div>
                                                     <div style={{
                                                         fontSize: '12px',

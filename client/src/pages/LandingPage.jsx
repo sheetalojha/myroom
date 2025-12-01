@@ -43,7 +43,7 @@ const LandingPage = () => {
             fontWeight: 500,
             color: '#333'
           }}>
-            Chambers
+            LittleWorlds
           </h2>
         </div>
         <WalletConnect />
@@ -66,7 +66,7 @@ const LandingPage = () => {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
-          }}>chambers</span>,
+          }}>littleworlds</span>,
           <br />
           mint as <span style={{
             background: 'linear-gradient(135deg, #ff4757 0%, #ffa502 50%, #ffd700 100%)',
@@ -82,7 +82,7 @@ const LandingPage = () => {
           margin: '0 0 48px 0',
           lineHeight: 1.5
         }}>
-          Create 3D chamber designs and turn them into collectible NFTs
+          Create 3D littleworld designs and turn them into collectible NFTs
         </p>
 
         {/* Action buttons */}
@@ -119,7 +119,7 @@ const LandingPage = () => {
                   gap: '8px'
                 }}
               >
-                Create Chamber
+                Create LittleWorld
                 <ArrowRight size={16} />
               </button>
               <button
@@ -137,7 +137,7 @@ const LandingPage = () => {
                   gap: '8px'
                 }}
               >
-                Browse Chambers
+                Browse LittleWorlds
                 <ArrowRight size={16} />
               </button>
             </>

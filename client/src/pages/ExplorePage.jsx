@@ -195,7 +195,7 @@ const ExplorePage = () => {
             />
             <input
               type="text"
-              placeholder="Search chambers..."
+              placeholder="Search littleworlds..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
@@ -240,10 +240,10 @@ const ExplorePage = () => {
               <Home size={24} color="#9CA3AF" />
             </div>
             <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 6, color: '#374151' }}>
-              {searchQuery ? 'No chambers found' : 'No chambers yet'}
+              {searchQuery ? 'No littleworlds found' : 'No littleworlds yet'}
             </p>
             <p style={{ fontSize: 12, color: '#9CA3AF' }}>
-              {searchQuery ? 'Try a different search term' : 'Be the first to create and publish a chamber!'}
+              {searchQuery ? 'Try a different search term' : 'Be the first to create and publish a littleworld!'}
             </p>
           </div>
         ) : (
@@ -256,7 +256,7 @@ const ExplorePage = () => {
               group.versions.map((scene) => (
                     <div
                       key={scene.tokenId}
-                      onClick={() => navigate(`/chamber/${scene.tokenId}`)}
+                      onClick={() => navigate(`/littleworld/${scene.tokenId}`)}
                       style={{
                         background: 'white',
                         borderRadius: '8px',
@@ -351,7 +351,7 @@ const ExplorePage = () => {
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap'
                         }}>
-                          {scene.name || `Chamber #${scene.tokenId}`}
+                          {scene.name || `LittleWorld #${scene.tokenId}`}
                         </div>
                         <div style={{
                           fontSize: 11,

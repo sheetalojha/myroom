@@ -18,7 +18,7 @@ describe("SceneNFT", function () {
 
   describe("Deployment", function () {
     it("Should set the right name and symbol", async function () {
-      expect(await sceneNFT.name()).to.equal("Chambers");
+      expect(await sceneNFT.name()).to.equal("LittleWorlds");
       expect(await sceneNFT.symbol()).to.equal("CHMBR");
     });
 

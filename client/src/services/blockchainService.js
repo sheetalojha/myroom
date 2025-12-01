@@ -540,7 +540,7 @@ class BlockchainService {
                 tokenId = Number(parsed.args.newTokenId);
             }
 
-            onProgress?.({ status: 'success', message: 'Chamber version created successfully!', tokenId, txHash: receipt.hash });
+            onProgress?.({ status: 'success', message: 'LittleWorld version created successfully!', tokenId, txHash: receipt.hash });
 
             return { tokenId, txHash: receipt.hash };
         } catch (error) {
@@ -610,7 +610,7 @@ class BlockchainService {
                 tokenId = Number(parsed.args.newTokenId);
             }
 
-            onProgress?.({ status: 'success', message: 'Chamber remixed successfully!', tokenId, txHash: receipt.hash });
+            onProgress?.({ status: 'success', message: 'LittleWorld remixed successfully!', tokenId, txHash: receipt.hash });
 
             return { tokenId, txHash: receipt.hash };
         } catch (error) {

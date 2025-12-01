@@ -59,7 +59,7 @@ const UIOverlay = () => {
     const roomConfig = useStore((state) => state.roomConfig);
     const setColorTheme = useStore((state) => state.setColorTheme);
     
-    // Fetch chamber name if editing/viewing an existing chamber
+    // Fetch littleworld name if editing/viewing an existing littleworld
     useEffect(() => {
         const fetchChamberName = async () => {
             if (currentChamberTokenId !== null && window.ethereum) {
@@ -69,7 +69,7 @@ const UIOverlay = () => {
                     const metadata = await blockchainService.getSceneByTokenId(currentChamberTokenId);
                     setChamberName(metadata.name || 'My Room');
                 } catch (error) {
-                    console.error('Error fetching chamber name:', error);
+                    console.error('Error fetching littleworld name:', error);
                     setChamberName('My Room');
                 }
             } else {
@@ -158,7 +158,7 @@ const UIOverlay = () => {
                         color: '#1A202C',
                         letterSpacing: '-0.01em'
                     }}>
-                        kamra
+                        LittleWorlds
                     </span>
                 </div>
 
