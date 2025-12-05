@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
 import { ArrowRight, Home } from 'lucide-react';
 import WalletConnect from '../components/WalletConnect';
+import { Button, Card } from '../components/ui';
+import theme from '../styles/theme';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -37,18 +39,18 @@ const LandingPage = () => {
       `}</style>
       <div style={{
         width: '100%',
-        backgroundColor: '#fff8f5',
+        backgroundColor: theme.colors.background.primary,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '80px 40px 40px 40px',
+        padding: `${theme.spacing[20]} ${theme.spacing[10]} ${theme.spacing[10]} ${theme.spacing[10]}`,
         position: 'relative'
       }}>
-        {/* Voxel SVGs - Scattered around the page with animations */}
+        {/* Voxel SVGs - Scattered around the page with animations - moved further out */}
         <div style={{
           position: 'absolute',
           top: '15%',
-          left: '5%',
+          left: '-2%', // Moved further outside
           width: '220px',
           height: '220px',
           zIndex: 1,
@@ -67,7 +69,7 @@ const LandingPage = () => {
         <div style={{
           position: 'absolute',
           top: '10%',
-          right: '8%',
+          right: '-2%', // Moved further outside
           width: '200px',
           height: '200px',
           zIndex: 1,
@@ -86,7 +88,7 @@ const LandingPage = () => {
         <div style={{
           position: 'absolute',
           bottom: '5%',
-          left: '10%',
+          left: '-2%', // Moved further outside
           width: '210px',
           height: '210px',
           zIndex: 1,
@@ -105,7 +107,7 @@ const LandingPage = () => {
         <div style={{
           position: 'absolute',
           bottom: '15%',
-          right: '6%',
+          right: '-2%', // Moved further outside
           width: '240px',
           height: '240px',
           zIndex: 1,
@@ -125,7 +127,7 @@ const LandingPage = () => {
       {/* Header */}
       <div style={{
         position: 'fixed',
-        top: '20px',
+        top: theme.spacing[5],
         left: '50%',
         transform: 'translateX(-50%)',
         display: 'flex',
@@ -133,19 +135,20 @@ const LandingPage = () => {
         alignItems: 'center',
         width: '90%',
         maxWidth: '1200px',
-        zIndex: 10
+        zIndex: theme.zIndex.fixed
       }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '8px'
+          gap: theme.spacing[2],
+          background: 'transparent', // Transparent background
         }}>
-          <Home size={20} color="#7a6b7a" />
+          <Home size={20} color={theme.colors.text.tertiary} />
           <h2 style={{
             margin: 0,
-            fontSize: '18px', 
-            fontWeight: 500,
-            color: '#7a6b7a'
+            fontSize: theme.typography.fontSize.lg,
+            fontWeight: theme.typography.fontWeight.medium,
+            color: theme.colors.text.tertiary
           }}>
             LittleWorlds
           </h2>
@@ -164,15 +167,15 @@ const LandingPage = () => {
         zIndex: 2
       }}>
         <h1 style={{
-          fontSize: '48px',
-          fontWeight: 500,
-          margin: '0 0 20px 0',
-          lineHeight: 1.2,
-          color: '#6b5d6b',
+          fontSize: theme.typography.fontSize['5xl'],
+          fontWeight: theme.typography.fontWeight.medium,
+          margin: `0 0 ${theme.spacing[5]} 0`,
+          lineHeight: theme.typography.lineHeight.tight,
+          color: theme.colors.primary[500],
           textAlign: 'center'
         }}>
           Build <span style={{
-            background: 'linear-gradient(135deg, #ff6b9d 0%, #b894f5 50%, #6ba3ff 100%)',
+            background: `linear-gradient(135deg, ${theme.colors.gradientDark.start} 0%, ${theme.colors.gradientDark.middle} 50%, ${theme.colors.gradientDark.end} 100%)`,
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -180,7 +183,7 @@ const LandingPage = () => {
           }}>worlds</span>.
           <br />
           Own them <span style={{
-            background: 'linear-gradient(135deg, #ff6b9d 0%, #b894f5 50%, #6ba3ff 100%)',
+            background: `linear-gradient(135deg, ${theme.colors.gradientDark.start} 0%, ${theme.colors.gradientDark.middle} 50%, ${theme.colors.gradientDark.end} 100%)`,
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -189,13 +192,13 @@ const LandingPage = () => {
         </h1>
         
         <p style={{
-          fontSize: '16px',
-          color: '#8b7d8b',
-          margin: '0 0 48px 0',
-          lineHeight: 1.5,
+          fontSize: theme.typography.fontSize.lg,
+          color: theme.colors.text.tertiary,
+          margin: `0 0 ${theme.spacing[12]} 0`,
+          lineHeight: theme.typography.lineHeight.normal,
           textAlign: 'center',
           maxWidth: '550px',
-          fontWeight: 400
+          fontWeight: theme.typography.fontWeight.normal
         }}>
           On-chain ownership. Portable across apps. Discover rewards in-world.
         </p>
@@ -203,103 +206,74 @@ const LandingPage = () => {
         {/* Action buttons */}
         <div style={{
           display: 'flex',
-          gap: '16px',
+          gap: theme.spacing[4],
           justifyContent: 'center',
           flexWrap: 'wrap',
           alignItems: 'center'
         }}>
           {!isConnected ? (
-            <div style={{
-              padding: '12px 24px',
-              backgroundColor: '#f0d8e8',
-              borderRadius: '8px',
-              color: '#8b7d8b',
-              fontSize: '16px'
+            <Card padding="md" style={{
+              background: theme.colors.primary[100],
+              color: theme.colors.text.tertiary,
             }}>
               Connect wallet to continue
-            </div>
+            </Card>
           ) : (
             <>
-              <button
+              <Button
+                variant="primary"
+                size="lg"
                 onClick={() => navigate('/editor')}
-                style={{
-                  backgroundColor: '#ff6b9d',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '12px 24px',
-                  fontSize: '16px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  transition: 'opacity 0.2s',
-                  fontWeight: 500
-                }}
-                onMouseEnter={(e) => e.target.style.opacity = '0.9'}
-                onMouseLeave={(e) => e.target.style.opacity = '1'}
+                icon={ArrowRight}
+                iconPosition="right"
               >
                 Create LittleWorld
-                <ArrowRight size={16} />
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="secondary"
+                size="lg"
                 onClick={() => navigate('/explore')}
-                style={{
-                  backgroundColor: 'transparent',
-                  color: '#6b5d6b',
-                  border: '2px solid #b894f5',
-                  borderRadius: '8px',
-                  padding: '12px 24px',
-                  fontSize: '16px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  transition: 'background-color 0.2s',
-                  fontWeight: 500
-                }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#f0e8ff'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                icon={ArrowRight}
+                iconPosition="right"
               >
                 Browse LittleWorlds
-                <ArrowRight size={16} />
-              </button>
+              </Button>
             </>
           )}
         </div>
 
         {/* Demo Asset */}
         <div style={{
-          margin: '64px 0 0 0',
+          margin: `${theme.spacing[12]} 0 0 0`,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          width: '100%'
+          width: '100%',
+          padding: `0 ${theme.spacing[4]}`
         }}>
-          <div style={{
-            position: 'relative',
-            padding: '40px',
-            backgroundColor: '#fff',
-            borderRadius: '24px',
-            boxShadow: '0 4px 24px rgba(139, 125, 139, 0.12)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100%',
-            maxWidth: '700px'
-          }}>
+          <Card
+            padding="sm"
+            hover
+            style={{
+              width: '100%',
+              maxWidth: '900px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
             <img 
               src="/Demo.png" 
               alt="Demo" 
               style={{
                 width: '100%',
                 height: 'auto',
-                borderRadius: '12px',
+                borderRadius: theme.borderRadius.md,
                 imageRendering: 'pixelated',
                 display: 'block'
               }}
             />
-          </div>
+          </Card>
         </div>
       </div>
 
@@ -307,31 +281,29 @@ const LandingPage = () => {
       <div style={{
         width: '100%',
         maxWidth: '1200px',
-        marginTop: '80px',
+        marginTop: theme.spacing[20],
         display: 'grid',
         gridTemplateColumns: '1fr 1fr 1fr',
         gridTemplateRows: 'auto auto',
-        gap: '20px',
-        paddingBottom: '80px'
+        gap: theme.spacing[5],
+        paddingBottom: theme.spacing[20]
       }}>
         {/* Section 1 - Trust-first Ownership - Long Vertically */}
-        <div style={{
-          padding: '1px',
-          border: '1px solid #e0e0e0',
-          borderRadius: '12px',
-          backgroundColor: '#fff',
-          gridRow: 'span 2',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
+        <Card
+          padding="none"
+          hover
+          style={{
+            gridRow: 'span 2',
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%'
+          }}
+        >
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            padding: '32px',
-            border: '3px solid #e0e0e0',
-            borderRadius: '11px',
-            backgroundColor: '#fff',
-            gap: '16px',
+            padding: theme.spacing[8],
+            gap: theme.spacing[4],
             height: '100%'
           }}>
             <div style={{
@@ -350,165 +322,126 @@ const LandingPage = () => {
               />
             </div>
             <h2 style={{
-              fontSize: '32px',
-              fontWeight: 500,
-              color: '#6b5d6b',
+              fontSize: theme.typography.fontSize['3xl'],
+              fontWeight: theme.typography.fontWeight.medium,
+              color: theme.colors.primary[500],
               margin: 0,
-              lineHeight: 1.3
+              lineHeight: theme.typography.lineHeight.tight
             }}>
               Trust-first <span style={{
-                background: 'linear-gradient(135deg, #ff6b9d 0%, #b894f5 50%, #6ba3ff 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
+                color: theme.colors.primary[500]
               }}>ownership</span>
             </h2>
             <p style={{
-              fontSize: '18px',
-              color: '#8b7d8b',
-              lineHeight: 1.5,
+              fontSize: theme.typography.fontSize.xl,
+              color: theme.colors.text.tertiary,
+              lineHeight: theme.typography.lineHeight.normal,
               margin: 0
             }}>
               Every object is an on-chain token with verifiable provenance.
             </p>
           </div>
-        </div>
+        </Card>
 
         {/* Section 2 - Portable Composability */}
-        <div style={{
-          padding: '1px',
-          border: '1px solid #e0e0e0',
-          borderRadius: '12px',
-          backgroundColor: '#fff',
-          display: 'flex',
-          flexDirection: 'column',
-          gridColumn: '2'
-        }}>
-          <div style={{
+        <Card
+          padding="lg"
+          hover
+          style={{
+            gridColumn: '2',
             display: 'flex',
             flexDirection: 'column',
-            padding: '32px',
-            border: '3px solid #e0e0e0',
-            borderRadius: '11px',
-            backgroundColor: '#fff',
-            gap: '16px',
             height: '100%'
+          }}
+        >
+          <h2 style={{
+            fontSize: theme.typography.fontSize['3xl'],
+            fontWeight: theme.typography.fontWeight.medium,
+            color: theme.colors.primary[500],
+            margin: 0,
+            lineHeight: theme.typography.lineHeight.tight
           }}>
-            <h2 style={{
-              fontSize: '32px',
-              fontWeight: 500,
-              color: '#6b5d6b',
-              margin: 0,
-              lineHeight: 1.3
-            }}>
               Portable <span style={{
-                background: 'linear-gradient(135deg, #ff6b9d 0%, #b894f5 50%, #6ba3ff 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>composability</span>
-            </h2>
-            <p style={{
-              fontSize: '18px',
-              color: '#8b7d8b',
-              lineHeight: 1.5,
-              margin: 0
-            }}>
-              Assets move seamlessly between rooms, apps, and marketplaces.
-            </p>
-          </div>
-        </div>
+              color: theme.colors.primary[500]
+            }}>composability</span>
+          </h2>
+          <p style={{
+            fontSize: theme.typography.fontSize.xl,
+            color: theme.colors.text.tertiary,
+            lineHeight: theme.typography.lineHeight.normal,
+            margin: 0,
+            marginTop: theme.spacing[4]
+          }}>
+            Assets move seamlessly between rooms, apps, and marketplaces.
+          </p>
+        </Card>
 
         {/* Section 3 - Gamified Discovery */}
-        <div style={{
-          padding: '1px',
-          border: '1px solid #e0e0e0',
-          borderRadius: '12px',
-          backgroundColor: '#fff',
-          display: 'flex',
-          flexDirection: 'column',
-          gridColumn: '3'
-        }}>
-          <div style={{
+        <Card
+          padding="lg"
+          hover
+          style={{
+            gridColumn: '3',
             display: 'flex',
             flexDirection: 'column',
-            padding: '32px',
-            border: '3px solid #e0e0e0',
-            borderRadius: '11px',
-            backgroundColor: '#fff',
-            gap: '16px',
             height: '100%'
+          }}
+        >
+          <h2 style={{
+            fontSize: theme.typography.fontSize['3xl'],
+            fontWeight: theme.typography.fontWeight.medium,
+            color: theme.colors.primary[500],
+            margin: 0,
+            lineHeight: theme.typography.lineHeight.tight
           }}>
-            <h2 style={{
-              fontSize: '32px',
-              fontWeight: 500,
-              color: '#6b5d6b',
-              margin: 0,
-              lineHeight: 1.3
-            }}>
               Gamified <span style={{
-                background: 'linear-gradient(135deg, #ff6b9d 0%, #b894f5 50%, #6ba3ff 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>discovery</span>
-            </h2>
-            <p style={{
-              fontSize: '18px',
-              color: '#8b7d8b',
-              lineHeight: 1.5,
-              margin: 0
-            }}>
-              Easter eggs and spatial rewards turn exploration into viral distribution.
-            </p>
-          </div>
-        </div>
+              color: theme.colors.primary[500]
+            }}>discovery</span>
+          </h2>
+          <p style={{
+            fontSize: theme.typography.fontSize.xl,
+            color: theme.colors.text.tertiary,
+            lineHeight: theme.typography.lineHeight.normal,
+            margin: 0,
+            marginTop: theme.spacing[4]
+          }}>
+            Easter eggs and spatial rewards turn exploration into viral distribution.
+          </p>
+        </Card>
 
         {/* Section 4 - Creator Economy */}
-        <div style={{
-          padding: '1px',
-          border: '1px solid #e0e0e0',
-          borderRadius: '12px',
-          backgroundColor: '#fff',
-          display: 'flex',
-          flexDirection: 'column',
-          gridColumn: '2 / span 2',
-          gridRow: '2'
-        }}>
-          <div style={{
+        <Card
+          padding="lg"
+          hover
+          style={{
+            gridColumn: '2 / span 2',
+            gridRow: '2',
             display: 'flex',
             flexDirection: 'column',
-            padding: '32px',
-            border: '3px solid #e0e0e0',
-            borderRadius: '11px',
-            backgroundColor: '#fff',
-            gap: '16px',
             height: '100%'
+          }}
+        >
+          <h2 style={{
+            fontSize: theme.typography.fontSize['3xl'],
+            fontWeight: theme.typography.fontWeight.medium,
+            color: theme.colors.primary[500],
+            margin: 0,
+            lineHeight: theme.typography.lineHeight.tight
           }}>
-            <h2 style={{
-              fontSize: '32px',
-              fontWeight: 500,
-              color: '#6b5d6b',
-              margin: 0,
-              lineHeight: 1.3
-            }}>
               Creator-first <span style={{
-                background: 'linear-gradient(135deg, #ff6b9d 0%, #b894f5 50%, #6ba3ff 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>economy</span>
-            </h2>
-            <p style={{
-              fontSize: '18px',
-              color: '#8b7d8b',
-              lineHeight: 1.5,
-              margin: 0
-            }}>
-              Mint with royalties and control distribution while users trade safely.
-            </p>
-          </div>
-        </div>
+              color: theme.colors.primary[500]
+            }}>economy</span>
+          </h2>
+          <p style={{
+            fontSize: theme.typography.fontSize.xl,
+            color: theme.colors.text.tertiary,
+            lineHeight: theme.typography.lineHeight.normal,
+            margin: 0,
+            marginTop: theme.spacing[4]
+          }}>
+            Mint with royalties and control distribution while users trade safely.
+          </p>
+        </Card>
       </div>
     </div>
     </>

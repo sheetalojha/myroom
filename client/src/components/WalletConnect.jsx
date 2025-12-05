@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi';
 import { baseSepoliaChain } from '../config/web3Config';
 import { Wallet, LogOut, AlertCircle, Copy, ExternalLink, RefreshCw, ChevronDown } from 'lucide-react';
+import { Button, Card } from './ui';
+import theme from '../styles/theme';
 
 const WalletConnect = () => {
   const { address, isConnected, chain } = useAccount();
@@ -79,44 +81,34 @@ const WalletConnect = () => {
   if (!isConnected) {
     return (
       <div>
-        <button
+        <Button
+          variant="primary"
+          size="md"
           onClick={handleConnect}
-          style={{
-            backgroundColor: '#ff6b9d',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '9999px',
-            padding: '12px 24px',
-            fontSize: '16px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            transition: 'opacity 0.2s',
-            fontWeight: 500
-          }}
-          onMouseEnter={(e) => e.target.style.opacity = '0.9'}
-          onMouseLeave={(e) => e.target.style.opacity = '1'}
+          icon={Wallet}
         >
-          <Wallet size={16} />
           Connect Wallet
-        </button>
+        </Button>
         {connectError && (
-          <div style={{
-            marginTop: 8,
-            padding: '8px 16px',
-            background: '#FEFCF3',
-            color: '#c33',
-            borderRadius: '9999px',
-            fontSize: 11,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            border: '1px solid rgba(0, 0, 0, 0.1)'
-          }}>
-            <AlertCircle size={12} />
-            {connectError.message}
-          </div>
+          <Card
+            padding="sm"
+            style={{
+              marginTop: theme.spacing[2],
+              background: theme.colors.warning + '15',
+              border: `1px solid ${theme.colors.warning}40`,
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: theme.spacing[2],
+              color: theme.colors.error,
+              fontSize: theme.typography.fontSize.sm,
+            }}>
+              <AlertCircle size={12} />
+              {connectError.message}
+            </div>
+          </Card>
         )}
       </div>
     );
@@ -130,103 +122,72 @@ const WalletConnect = () => {
       position: 'relative'
     }} ref={menuRef}>
       {!isCorrectNetwork && (
-        <button
+        <Button
+          variant="primary"
+          size="md"
           onClick={handleSwitchNetwork}
-          style={{
-            backgroundColor: '#ff6b9d',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '9999px',
-            padding: '12px 24px',
-            fontSize: '16px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            transition: 'opacity 0.2s',
-            fontWeight: 500,
-            marginBottom: '8px'
-          }}
-          onMouseEnter={(e) => e.target.style.opacity = '0.9'}
-          onMouseLeave={(e) => e.target.style.opacity = '1'}
+          icon={AlertCircle}
+          style={{ marginBottom: theme.spacing[2] }}
         >
-          <AlertCircle size={16} />
           Switch Network
-        </button>
+        </Button>
       )}
       <div style={{ position: 'relative' }}>
-        <button
+        <Button
+          variant="secondary"
+          size="md"
           onClick={() => setShowMenu(!showMenu)}
-          style={{
-            backgroundColor: '#FEFCF3',
-            color: '#1A202C',
-            border: '1px solid rgba(0, 0, 0, 0.15)',
-            borderRadius: '9999px',
-            padding: '12px 24px',
-            fontSize: '16px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            transition: 'all 0.2s',
-            fontWeight: 500
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.backgroundColor = '#F5F5F5';
-            e.target.style.borderColor = 'rgba(0, 0, 0, 0.25)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.backgroundColor = '#FEFCF3';
-            e.target.style.borderColor = 'rgba(0, 0, 0, 0.15)';
-          }}
+          icon={Wallet}
+          iconPosition="left"
         >
-          <Wallet size={16} />
-          <span>{formatAddress(address)}</span>
+          {formatAddress(address)}
           <ChevronDown 
-            size={16} 
+            size={14} 
             style={{
               transition: 'transform 0.15s ease',
-              transform: showMenu ? 'rotate(180deg)' : 'rotate(0deg)'
+              transform: showMenu ? 'rotate(180deg)' : 'rotate(0deg)',
+              marginLeft: theme.spacing[1]
             }}
           />
-        </button>
+        </Button>
 
         {/* Dropdown Menu */}
         {showMenu && (
-          <div style={{
-            position: 'absolute',
-            top: '100%',
-            right: 0,
-            marginTop: 8,
-            background: '#FEFCF3',
-            borderRadius: '24px',
-            border: '1px solid rgba(0, 0, 0, 0.15)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-            minWidth: 200,
-            overflow: 'hidden',
-            zIndex: 1000,
-            animation: 'slideDown 0.2s ease'
-          }}>
+          <Card
+            padding="none"
+            style={{
+              position: 'absolute',
+              top: '100%',
+              right: 0,
+              marginTop: theme.spacing[2],
+              minWidth: 200,
+              overflow: 'hidden',
+              zIndex: theme.zIndex.dropdown,
+              animation: 'slideDown 0.2s ease',
+              background: `linear-gradient(135deg, ${theme.colors.gradientPurple.start} 0%, ${theme.colors.gradientPurple.middle} 50%, ${theme.colors.gradientPurple.end} 100%)`
+            }}
+          >
             {/* Account Info */}
             <div style={{
-              padding: '12px 16px',
-              borderBottom: '1px solid rgba(0,0,0,0.08)'
+              padding: theme.spacing[3],
+              borderBottom: `1px solid ${theme.colors.border.medium}`,
+              background: `linear-gradient(135deg, ${theme.colors.gradientPurple.start} 0%, ${theme.colors.gradientPurple.middle} 100%)`
             }}>
               <div style={{
-                fontSize: 10,
-                fontWeight: 600,
-                color: '#6B7280',
+                fontSize: theme.typography.fontSize.xs,
+                fontWeight: theme.typography.fontWeight.semibold,
+                color: theme.colors.text.secondary,
                 textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                marginBottom: 4
+                letterSpacing: theme.typography.letterSpacing.wide,
+                marginBottom: theme.spacing[1]
               }}>
                 Connected Account
               </div>
               <div style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: '#1A202C',
-                fontFamily: 'monospace'
+                fontSize: theme.typography.fontSize.base,
+                fontWeight: theme.typography.fontWeight.semibold,
+                color: theme.colors.text.primary,
+                fontFamily: theme.typography.fontFamily.mono
               }}>
                 {formatAddress(address)}
               </div>
@@ -234,26 +195,27 @@ const WalletConnect = () => {
 
             {/* Menu Items */}
             <div style={{
-              padding: '8px',
+              padding: theme.spacing[2],
               display: 'flex',
               flexDirection: 'column',
-              gap: 2
+              gap: theme.spacing[1],
+              background: `linear-gradient(135deg, ${theme.colors.gradientPurple.middle} 0%, ${theme.colors.gradientPurple.end} 100%)`
             }}>
               <button
                 onClick={handleCopyAddress}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '10px 12px',
-                  borderRadius: '9999px',
+                  gap: theme.spacing[2],
+                  padding: `${theme.spacing[2]} ${theme.spacing[3]}`,
+                  borderRadius: theme.borderRadius.full,
                   border: 'none',
                   background: 'transparent',
                   cursor: 'pointer',
-                  fontSize: 13,
-                  fontWeight: 500,
-                  color: '#1A202C',
-                  transition: 'all 0.15s ease',
+                  fontSize: theme.typography.fontSize.sm,
+                  fontWeight: theme.typography.fontWeight.medium,
+                  color: theme.colors.text.primary,
+                  transition: `all ${theme.transitions.fast} ${theme.easing.easeOut}`,
                   textAlign: 'left'
                 }}
                 onMouseEnter={(e) => {
@@ -263,7 +225,7 @@ const WalletConnect = () => {
                   e.currentTarget.style.background = 'transparent';
                 }}
               >
-                <Copy size={14} color="#6B7280" />
+                <Copy size={14} color={theme.colors.text.secondary} />
                 Copy Address
               </button>
 
@@ -272,16 +234,16 @@ const WalletConnect = () => {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '10px 12px',
-                  borderRadius: '9999px',
+                  gap: theme.spacing[2],
+                  padding: `${theme.spacing[2]} ${theme.spacing[3]}`,
+                  borderRadius: theme.borderRadius.full,
                   border: 'none',
                   background: 'transparent',
                   cursor: 'pointer',
-                  fontSize: 13,
-                  fontWeight: 500,
-                  color: '#1A202C',
-                  transition: 'all 0.15s ease',
+                  fontSize: theme.typography.fontSize.sm,
+                  fontWeight: theme.typography.fontWeight.medium,
+                  color: theme.colors.text.primary,
+                  transition: `all ${theme.transitions.fast} ${theme.easing.easeOut}`,
                   textAlign: 'left'
                 }}
                 onMouseEnter={(e) => {
@@ -291,7 +253,7 @@ const WalletConnect = () => {
                   e.currentTarget.style.background = 'transparent';
                 }}
               >
-                <ExternalLink size={14} color="#6B7280" />
+                <ExternalLink size={14} color={theme.colors.text.secondary} />
                 View on BaseScan
               </button>
 
@@ -300,16 +262,16 @@ const WalletConnect = () => {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '10px 12px',
-                  borderRadius: '9999px',
+                  gap: theme.spacing[2],
+                  padding: `${theme.spacing[2]} ${theme.spacing[3]}`,
+                  borderRadius: theme.borderRadius.full,
                   border: 'none',
                   background: 'transparent',
                   cursor: 'pointer',
-                  fontSize: 13,
-                  fontWeight: 500,
-                  color: '#1A202C',
-                  transition: 'all 0.15s ease',
+                  fontSize: theme.typography.fontSize.sm,
+                  fontWeight: theme.typography.fontWeight.medium,
+                  color: theme.colors.text.primary,
+                  transition: `all ${theme.transitions.fast} ${theme.easing.easeOut}`,
                   textAlign: 'left'
                 }}
                 onMouseEnter={(e) => {
@@ -319,14 +281,14 @@ const WalletConnect = () => {
                   e.currentTarget.style.background = 'transparent';
                 }}
               >
-                <RefreshCw size={14} color="#6B7280" />
+                <RefreshCw size={14} color={theme.colors.text.secondary} />
                 Change Account
               </button>
 
               <div style={{
                 height: 1,
-                background: 'rgba(0,0,0,0.08)',
-                margin: '6px 8px'
+                background: theme.colors.border.medium,
+                margin: `${theme.spacing[2]} ${theme.spacing[2]}`
               }} />
 
               <button
@@ -337,30 +299,30 @@ const WalletConnect = () => {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '10px 12px',
-                  borderRadius: '9999px',
+                  gap: theme.spacing[2],
+                  padding: `${theme.spacing[2]} ${theme.spacing[3]}`,
+                  borderRadius: theme.borderRadius.full,
                   border: 'none',
                   background: 'transparent',
                   cursor: 'pointer',
-                  fontSize: 13,
-                  fontWeight: 500,
-                  color: '#DC2626',
-                  transition: 'all 0.15s ease',
+                  fontSize: theme.typography.fontSize.sm,
+                  fontWeight: theme.typography.fontWeight.medium,
+                  color: theme.colors.error,
+                  transition: `all ${theme.transitions.fast} ${theme.easing.easeOut}`,
                   textAlign: 'left'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(220, 38, 38, 0.1)';
+                  e.currentTarget.style.background = theme.colors.error + '15';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'transparent';
                 }}
               >
-                <LogOut size={14} color="#DC2626" />
+                <LogOut size={14} color={theme.colors.error} />
                 Disconnect
               </button>
             </div>
-          </div>
+          </Card>
         )}
       </div>
       <style>{`

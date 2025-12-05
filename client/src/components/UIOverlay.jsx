@@ -12,6 +12,8 @@ import NFTLibrary from './NFTLibrary';
 import ObjectTransformPanel from './ObjectTransformPanel';
 import blockchainService from '../services/blockchainService';
 import { COLOR_THEMES, LIGHTING_PRESETS, WALL_COLOR_PRESETS, FLOOR_COLOR_PRESETS } from '../config/roomThemes';
+import { Button, Card } from './ui';
+import theme from '../styles/theme';
 import {
     Armchair,
     Lamp,
@@ -132,223 +134,163 @@ const UIOverlay = () => {
             pointerEvents: 'none',
             fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
         }}>
-            {/* Top Left - Floating Navbar */}
+            {/* Top Navbar - Fixed and Clean */}
             <div style={{
-                position: 'absolute',
-                top: 24,
-                left: 24,
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 56,
+                background: 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                borderBottom: `1px solid rgba(0, 0, 0, 0.08)`,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 8,
+                justifyContent: 'space-between',
+                padding: `0 ${theme.spacing[6]}`,
                 pointerEvents: 'auto',
-                zIndex: 100
+                zIndex: theme.zIndex.fixed
             }}>
-                {/* Logo - Floating pill */}
-                <div style={{
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    backdropFilter: 'blur(16px)',
-                    borderRadius: '20px',
-                    padding: '6px 14px',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                }}>
-                    <span style={{
-                        fontSize: 13,
-                        fontWeight: 500,
-                        color: '#1A202C',
-                        letterSpacing: '-0.01em'
-                    }}>
-                        LittleWorlds
-                    </span>
-                </div>
-
-                {/* Mode Toggle - Floating pill */}
+                {/* Left Section */}
                 <div style={{
                     display: 'flex',
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    backdropFilter: 'blur(16px)',
-                    borderRadius: '20px',
-                    padding: '2px',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    alignItems: 'center',
+                    gap: theme.spacing[4]
                 }}>
-                    <button
-                        onClick={() => setMode('edit')}
-                        style={{
-                            padding: '4px 12px',
-                            borderRadius: '18px',
-                            border: 'none',
-                            background: isEditMode ? '#1A202C' : 'transparent',
-                            color: isEditMode ? '#FFFFFF' : '#6B7280',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 4,
-                            fontSize: 11,
-                            fontWeight: 500,
-                            transition: 'all 0.15s ease'
-                        }}
-                    >
-                        <Edit3 size={12} />
-                        Edit
-                    </button>
-                    <button
-                        onClick={() => setMode('view')}
-                        style={{
-                            padding: '4px 12px',
-                            borderRadius: '18px',
-                            border: 'none',
-                            background: !isEditMode ? '#1A202C' : 'transparent',
-                            color: !isEditMode ? '#FFFFFF' : '#6B7280',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 4,
-                            fontSize: 11,
-                            fontWeight: 500,
-                            transition: 'all 0.15s ease'
-                        }}
-                    >
-                        <Eye size={12} />
-                        View
-                    </button>
+                    {/* Logo */}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: theme.spacing[2]
+                    }}>
+                        <span style={{
+                            fontSize: theme.typography.fontSize.lg,
+                            fontWeight: theme.typography.fontWeight.semibold,
+                            color: theme.colors.text.primary,
+                            letterSpacing: theme.typography.letterSpacing.tight
+                        }}>
+                            LittleWorlds
+                        </span>
+                    </div>
+
+                    {/* Mode Toggle */}
+                    <div style={{
+                        display: 'flex',
+                        background: theme.colors.neutral[100],
+                        borderRadius: theme.borderRadius.md,
+                        padding: theme.spacing[1],
+                        gap: theme.spacing[1]
+                    }}>
+                        <button
+                            onClick={() => setMode('edit')}
+                            style={{
+                                padding: `${theme.spacing[1]} ${theme.spacing[3]}`,
+                                borderRadius: theme.borderRadius.sm,
+                                border: 'none',
+                                background: isEditMode ? theme.colors.text.primary : 'transparent',
+                                color: isEditMode ? theme.colors.text.inverse : theme.colors.text.secondary,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: theme.spacing[1],
+                                fontSize: theme.typography.fontSize.sm,
+                                fontWeight: theme.typography.fontWeight.medium,
+                                transition: `all ${theme.transitions.fast} ${theme.easing.easeOut}`
+                            }}
+                        >
+                            <Edit3 size={14} />
+                            Edit
+                        </button>
+                        <button
+                            onClick={() => setMode('view')}
+                            style={{
+                                padding: `${theme.spacing[1]} ${theme.spacing[3]}`,
+                                borderRadius: theme.borderRadius.sm,
+                                border: 'none',
+                                background: !isEditMode ? theme.colors.text.primary : 'transparent',
+                                color: !isEditMode ? theme.colors.text.inverse : theme.colors.text.secondary,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: theme.spacing[1],
+                                fontSize: theme.typography.fontSize.sm,
+                                fontWeight: theme.typography.fontWeight.medium,
+                                transition: `all ${theme.transitions.fast} ${theme.easing.easeOut}`
+                            }}
+                        >
+                            <Eye size={14} />
+                            View
+                        </button>
+                    </div>
+
+                    {/* Library Toggle - only in edit mode */}
+                    {isEditMode && (
+                        <>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setLibraryOpen(!libraryOpen)}
+                                icon={libraryOpen ? X : Menu}
+                            />
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    if (selectedId) {
+                                        selectObject(null);
+                                    } else {
+                                        setCustomizeOpen(!customizeOpen);
+                                    }
+                                }}
+                                icon={Palette}
+                                style={{
+                                    background: customizeOpen || selectedId ? theme.colors.neutral[200] : 'transparent'
+                                }}
+                            />
+                        </>
+                    )}
                 </div>
 
-                {/* Library Toggle - only in edit mode */}
-                {isEditMode && (
-                    <>
-                        <button
-                            onClick={() => setLibraryOpen(!libraryOpen)}
-                            style={{
-                                background: 'rgba(255, 255, 255, 0.95)',
-                                backdropFilter: 'blur(16px)',
-                                border: '1px solid rgba(255, 255, 255, 0.3)',
-                                borderRadius: '20px',
-                                width: 32,
-                                height: 32,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                cursor: 'pointer',
-                                transition: 'all 0.15s ease',
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
-                            }}
-                        >
-                            {libraryOpen ? <X size={14} color="#1A202C" /> : <Menu size={14} color="#1A202C" />}
-                        </button>
-                        <button
-                            onClick={() => {
-                                if (selectedId) {
-                                    // If object is selected, deselect it (transform panel will close)
-                                    selectObject(null);
-                                } else {
-                                    // Toggle customize panel
-                                    setCustomizeOpen(!customizeOpen);
-                                }
-                            }}
-                            style={{
-                                background: (customizeOpen || selectedId) ? '#1A202C' : 'rgba(255, 255, 255, 0.95)',
-                                backdropFilter: 'blur(16px)',
-                                border: '1px solid rgba(255, 255, 255, 0.3)',
-                                borderRadius: '20px',
-                                width: 32,
-                                height: 32,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                cursor: 'pointer',
-                                transition: 'all 0.15s ease',
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                            }}
-                            onMouseEnter={(e) => {
-                                if (!customizeOpen && !selectedId) {
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                if (!customizeOpen && !selectedId) {
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
-                                }
-                            }}
-                        >
-                            <Palette size={14} color={(customizeOpen || selectedId) ? "#FFFFFF" : "#1A202C"} />
-                        </button>
-                    </>
-                )}
-
-                {/* Wallet Connect - In Navbar */}
-                <WalletConnect />
+                {/* Right Section */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: theme.spacing[3]
+                }}>
+                    {/* Wallet Connect */}
+                    <WalletConnect />
+                </div>
             </div>
 
             {/* Top Right - Floating Save/Load Buttons - only in edit mode */}
             {isEditMode && (
                 <div style={{
                     position: 'absolute',
-                    top: 24,
-                    right: 24,
+                    top: 72,
+                    right: theme.spacing[6],
                     display: 'flex',
-                    gap: 8,
+                    gap: theme.spacing[2],
                     pointerEvents: 'auto',
-                    zIndex: 100
+                    zIndex: theme.zIndex.fixed
                 }}>
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={handleSave}
-                        style={{
-                            background: 'rgba(255, 255, 255, 0.95)',
-                            backdropFilter: 'blur(16px)',
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
-                            padding: '6px 14px',
-                            borderRadius: '20px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 4,
-                            fontSize: 11,
-                            fontWeight: 500,
-                            color: '#1A202C',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                            transition: 'all 0.15s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
-                        }}
+                        icon={Save}
                     >
-                        <Save size={12} /> Save
-                    </button>
-                    <label
-                        style={{
-                            background: 'rgba(255, 255, 255, 0.95)',
-                            backdropFilter: 'blur(16px)',
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
-                            padding: '6px 14px',
-                            borderRadius: '20px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 4,
-                            fontSize: 11,
-                            fontWeight: 500,
-                            color: '#1A202C',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                            transition: 'all 0.15s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
-                        }}
-                    >
-                        <Upload size={12} /> Load
+                        Save
+                    </Button>
+                    <label style={{ cursor: 'pointer' }}>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            icon={Upload}
+                            style={{ pointerEvents: 'none' }}
+                        >
+                            Load
+                        </Button>
                         <input type="file" accept=".json" onChange={handleLoad} style={{ display: 'none' }} />
                     </label>
                 </div>
@@ -358,47 +300,24 @@ const UIOverlay = () => {
             {isEditMode && (
                 <div style={{
                     position: 'absolute',
-                    bottom: 24,
+                    bottom: theme.spacing[6],
                     left: '50%',
                     transform: 'translateX(-50%)',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 12,
+                    gap: theme.spacing[3],
                     pointerEvents: 'auto',
-                    zIndex: 100
+                    zIndex: theme.zIndex.fixed
                 }}>
                     <PublishPanel />
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="md"
                         onClick={() => setShowNFTLibrary(true)}
-                        style={{
-                            background: 'rgba(255, 255, 255, 0.95)',
-                            backdropFilter: 'blur(16px)',
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
-                            padding: '8px 14px',
-                            borderRadius: '20px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 6,
-                            fontSize: 11,
-                            fontWeight: 500,
-                            color: '#1A202C',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                            transition: 'all 0.15s ease',
-                            whiteSpace: 'nowrap'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
-                            e.currentTarget.style.transform = 'translateY(0)';
-                        }}
+                        icon={Package}
                     >
-                        <Package size={12} />
                         My Rooms
-                    </button>
+                    </Button>
                 </div>
             )}
 
@@ -409,36 +328,36 @@ const UIOverlay = () => {
 
             {/* Right Sidebar - Customization Panel - only in edit mode when no object selected */}
             {isEditMode && customizeOpen && !selectedId && (
-                <div style={{
-                    position: 'absolute',
-                    top: 72,
-                    right: 24,
-                    bottom: 24,
-                    width: 320,
-                    maxHeight: 'calc(100vh - 96px)',
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,255,0.98) 100%)',
-                    backdropFilter: 'blur(20px)',
-                    borderRadius: '20px',
-                    boxShadow: '0 12px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    pointerEvents: 'auto',
-                    overflow: 'hidden',
-                    border: '1px solid rgba(255, 255, 255, 0.5)',
-                    zIndex: 90
-                }}>
+                <Card
+                    variant="simple"
+                    padding="none"
+                    style={{
+                        position: 'absolute',
+                        top: 72,
+                        right: theme.spacing[6],
+                        bottom: theme.spacing[6],
+                        width: 320,
+                        maxHeight: 'calc(100vh - 96px)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        pointerEvents: 'auto',
+                        overflow: 'hidden',
+                        zIndex: theme.zIndex.dropdown,
+                        border: `1px solid ${theme.colors.border.medium}`
+                    }}
+                >
                     <div style={{
-                        padding: '16px',
-                        borderBottom: '1px solid rgba(0,0,0,0.06)',
+                        padding: theme.spacing[4],
+                        borderBottom: `1px solid ${theme.colors.border.medium}`,
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 8
+                        gap: theme.spacing[2]
                     }}>
-                        <Settings size={16} color="#1A202C" />
+                        <Settings size={16} color={theme.colors.text.primary} />
                         <span style={{
-                            fontSize: 14,
-                            fontWeight: 600,
-                            color: '#1A202C'
+                            fontSize: theme.typography.fontSize.md,
+                            fontWeight: theme.typography.fontWeight.semibold,
+                            color: theme.colors.text.primary
                         }}>
                             Customize Room
                         </span>
@@ -447,18 +366,18 @@ const UIOverlay = () => {
                     <div style={{
                         flex: 1,
                         overflowY: 'auto',
-                        padding: '16px',
+                        padding: theme.spacing[4],
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: 20
+                        gap: theme.spacing[5]
                     }}>
                         {/* Color Theme */}
                         <div>
                             <label style={{
-                                fontSize: 12,
-                                fontWeight: 600,
-                                color: '#1A202C',
-                                marginBottom: 8,
+                                fontSize: theme.typography.fontSize.base,
+                                fontWeight: theme.typography.fontWeight.semibold,
+                                color: theme.colors.text.primary,
+                                marginBottom: theme.spacing[2],
                                 display: 'block'
                             }}>
                                 Color Theme
@@ -466,30 +385,30 @@ const UIOverlay = () => {
                             <div style={{
                                 display: 'grid',
                                 gridTemplateColumns: 'repeat(2, 1fr)',
-                                gap: 8
+                                gap: theme.spacing[2]
                             }}>
-                                {Object.entries(COLOR_THEMES).map(([key, theme]) => (
+                                {Object.entries(COLOR_THEMES).map(([key, themeConfig]) => (
                                     <button
                                         key={key}
                                         onClick={() => setColorTheme(key)}
                                         style={{
-                                            padding: '10px 12px',
-                                            borderRadius: '8px',
+                                            padding: `${theme.spacing[2]} ${theme.spacing[3]}`,
+                                            borderRadius: theme.borderRadius.md,
                                             border: roomConfig.colorTheme === key
-                                                ? '2px solid #1A202C'
-                                                : '1px solid rgba(0,0,0,0.1)',
+                                                ? `2px solid ${theme.colors.text.primary}`
+                                                : theme.borders.cardOuter,
                                             background: roomConfig.colorTheme === key
-                                                ? '#1A202C'
-                                                : 'rgba(0,0,0,0.02)',
-                                            color: roomConfig.colorTheme === key ? '#FFFFFF' : '#1A202C',
+                                                ? theme.colors.text.primary
+                                                : 'transparent',
+                                            color: roomConfig.colorTheme === key ? theme.colors.text.inverse : theme.colors.text.primary,
                                             cursor: 'pointer',
-                                            fontSize: 11,
-                                            fontWeight: 500,
-                                            transition: 'all 0.15s ease',
+                                            fontSize: theme.typography.fontSize.sm,
+                                            fontWeight: theme.typography.fontWeight.medium,
+                                            transition: `all ${theme.transitions.fast} ${theme.easing.easeOut}`,
                                             textAlign: 'left'
                                         }}
                                     >
-                                        {theme.name}
+                                        {themeConfig.name}
                                     </button>
                                 ))}
                             </div>
@@ -701,35 +620,36 @@ const UIOverlay = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </Card>
             )}
 
             {/* Left Sidebar - Floating Library Card - only in edit mode */}
             {isEditMode && libraryOpen && (
-                <div style={{
-                    position: 'absolute',
-                    top: 72,
-                    left: 24,
-                    bottom: 24,
-                    width: 300,
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,255,0.98) 100%)',
-                    backdropFilter: 'blur(20px)',
-                    borderRadius: '20px',
-                    boxShadow: '0 12px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    pointerEvents: 'auto',
-                    overflow: 'hidden',
-                    border: '1px solid rgba(255, 255, 255, 0.5)'
-                }}>
-                    {/* Categories - Beautiful */}
+                <Card
+                    variant="simple"
+                    padding="none"
+                    style={{
+                        position: 'absolute',
+                        top: 72,
+                        left: theme.spacing[6],
+                        bottom: theme.spacing[6],
+                        width: 300,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        pointerEvents: 'auto',
+                        overflow: 'hidden',
+                        zIndex: theme.zIndex.dropdown,
+                        border: `1px solid ${theme.colors.border.medium}`
+                    }}
+                >
+                    {/* Categories */}
                     <div style={{
                         display: 'flex',
-                        gap: 6,
-                        padding: '14px',
+                        gap: theme.spacing[2],
+                        padding: theme.spacing[3],
                         overflowX: 'auto',
-                        borderBottom: '1px solid rgba(0,0,0,0.06)',
-                        background: 'rgba(248,250,252,0.5)'
+                        borderBottom: `1px solid ${theme.colors.border.medium}`,
+                        background: theme.colors.neutral[50]
                     }}>
                         {Categories.map((cat) => {
                             const Icon = CategoryIcons[cat] || Box;
@@ -739,33 +659,31 @@ const UIOverlay = () => {
                                     key={cat}
                                     onClick={() => setActiveCategory(cat)}
                                     style={{
-                                        padding: '8px 14px',
-                                        borderRadius: '12px',
+                                        padding: `${theme.spacing[2]} ${theme.spacing[3]}`,
+                                        borderRadius: theme.borderRadius.md,
                                         border: 'none',
                                         background: isActive
-                                            ? 'linear-gradient(135deg, #1A202C 0%, #2D3748 100%)'
-                                            : 'rgba(255,255,255,0.8)',
-                                        color: isActive ? '#FFFFFF' : '#1A202C',
+                                            ? theme.colors.text.primary
+                                            : 'transparent',
+                                        color: isActive ? theme.colors.text.inverse : theme.colors.text.primary,
                                         cursor: 'pointer',
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: 6,
-                                        fontSize: 11,
-                                        fontWeight: isActive ? 600 : 500,
+                                        gap: theme.spacing[2],
+                                        fontSize: theme.typography.fontSize.sm,
+                                        fontWeight: isActive ? theme.typography.fontWeight.semibold : theme.typography.fontWeight.medium,
                                         whiteSpace: 'nowrap',
-                                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                                        boxShadow: isActive ? '0 2px 8px rgba(26,32,44,0.2)' : 'none'
+                                        transition: `all ${theme.transitions.fast} ${theme.easing.easeOut}`,
+                                        boxShadow: 'none'
                                     }}
                                     onMouseEnter={(e) => {
                                         if (!isActive) {
-                                            e.currentTarget.style.background = 'rgba(255,255,255,1)';
-                                            e.currentTarget.style.transform = 'translateY(-1px)';
+                                            e.currentTarget.style.background = theme.colors.neutral[100];
                                         }
                                     }}
                                     onMouseLeave={(e) => {
                                         if (!isActive) {
-                                            e.currentTarget.style.background = 'rgba(255,255,255,0.8)';
-                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.background = 'transparent';
                                         }
                                     }}
                                 >
@@ -780,42 +698,30 @@ const UIOverlay = () => {
                     <div style={{
                         flex: 1,
                         overflowY: 'auto',
-                        padding: '12px',
+                        padding: theme.spacing[3],
                         display: 'grid',
                         gridTemplateColumns: 'repeat(2, 1fr)',
-                        gap: 10,
+                        gap: theme.spacing[2],
                         alignContent: 'start'
                     }}>
                         {filteredItems.map(([type, item]) => (
-                            <div
+                            <Card
                                 key={type}
+                                variant="simple"
+                                padding="sm"
+                                hover
                                 onClick={() => addObject(type)}
                                 style={{
                                     aspectRatio: '1',
-                                    background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.9) 100%)',
-                                    borderRadius: '12px',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    border: '1px solid rgba(0,0,0,0.08)',
-                                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    padding: 8,
+                                    padding: theme.spacing[2],
                                     position: 'relative',
-                                    overflow: 'hidden'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(241,245,249,1) 100%)';
-                                    e.currentTarget.style.borderColor = 'rgba(26,32,44,0.2)';
-                                    e.currentTarget.style.transform = 'translateY(-2px)';
-                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.9) 100%)';
-                                    e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)';
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = 'none';
+                                    overflow: 'hidden',
+                                    border: `1px solid ${theme.colors.border.medium}`
                                 }}
                             >
                                 {/* 3D Preview */}
@@ -823,48 +729,47 @@ const UIOverlay = () => {
                                     width: '100%',
                                     height: '70%',
                                     position: 'relative',
-                                    borderRadius: '8px',
+                                    borderRadius: theme.borderRadius.md,
                                     overflow: 'hidden',
-                                    background: 'rgba(255,255,255,0.5)'
+                                    background: theme.colors.background.overlay
                                 }}>
                                     <ObjectPreview type={type} />
                                 </div>
                                 {/* Label */}
                                 <span style={{
-                                    fontSize: 10,
+                                    fontSize: theme.typography.fontSize.xs,
                                     textAlign: 'center',
-                                    color: '#1A202C',
-                                    fontWeight: 600,
-                                    marginTop: 6,
-                                    letterSpacing: '-0.01em'
+                                    color: theme.colors.text.primary,
+                                    fontWeight: theme.typography.fontWeight.semibold,
+                                    marginTop: theme.spacing[2],
+                                    letterSpacing: theme.typography.letterSpacing.tight
                                 }}>
                                     {item.label}
                                 </span>
-                            </div>
+                            </Card>
                         ))}
                     </div>
-                </div>
+                </Card>
             )}
 
             {/* Bottom Left - Floating Room Info */}
-            <div style={{
-                position: 'absolute',
-                bottom: 24,
-                left: 24,
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,255,0.98) 100%)',
-                backdropFilter: 'blur(20px)',
-                borderRadius: '20px',
-                padding: '10px 16px',
-                border: '1px solid rgba(255, 255, 255, 0.5)',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-                pointerEvents: 'auto',
-                zIndex: 100
-            }}>
+            <Card
+                variant="simple"
+                padding="sm"
+                style={{
+                    position: 'absolute',
+                    bottom: theme.spacing[6],
+                    left: theme.spacing[6],
+                    pointerEvents: 'auto',
+                    zIndex: theme.zIndex.fixed,
+                    border: `1px solid ${theme.colors.border.medium}`
+                }}
+            >
                 <div style={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: '#1A202C',
-                    letterSpacing: '-0.01em',
+                    fontSize: theme.typography.fontSize.base,
+                    fontWeight: theme.typography.fontWeight.semibold,
+                    color: theme.colors.text.primary,
+                    letterSpacing: theme.typography.letterSpacing.tight,
                     maxWidth: 200,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -872,41 +777,40 @@ const UIOverlay = () => {
                 }}>
                     {chamberName}
                 </div>
-            </div>
+            </Card>
 
             {/* Human Controls Hint - only in view mode when human exists */}
             {!isEditMode && objects.some(obj => obj.type === 'human') && (
-                <div style={{
-                    position: 'absolute',
-                    bottom: 24,
-                    right: 24,
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,255,0.98) 100%)',
-                    backdropFilter: 'blur(20px)',
-                    borderRadius: '16px',
-                    padding: '12px 16px',
-                    border: '1px solid rgba(255, 255, 255, 0.5)',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-                    pointerEvents: 'auto',
-                    zIndex: 100,
-                    maxWidth: 250
-                }}>
+                <Card
+                    variant="simple"
+                    padding="md"
+                    style={{
+                        position: 'absolute',
+                        bottom: theme.spacing[6],
+                        right: theme.spacing[6],
+                        pointerEvents: 'auto',
+                        zIndex: theme.zIndex.fixed,
+                        maxWidth: 250,
+                        border: `1px solid ${theme.colors.border.medium}`
+                    }}
+                >
                     <div style={{
-                        fontSize: 11,
-                        fontWeight: 600,
-                        color: '#1A202C',
-                        marginBottom: 6
+                        fontSize: theme.typography.fontSize.sm,
+                        fontWeight: theme.typography.fontWeight.semibold,
+                        color: theme.colors.text.primary,
+                        marginBottom: theme.spacing[2]
                     }}>
                         🎮 Human Controls
                     </div>
                     <div style={{
-                        fontSize: 10,
-                        color: '#6B7280',
-                        lineHeight: 1.5
+                        fontSize: theme.typography.fontSize.xs,
+                        color: theme.colors.text.secondary,
+                        lineHeight: theme.typography.lineHeight.normal
                     }}>
                         <div>WASD - Move</div>
                         <div>Space - Jump</div>
                     </div>
-                </div>
+                </Card>
             )}
 
             {/* Leva Panel (Properties) - only in edit mode when object selected and transform panel not shown */}
