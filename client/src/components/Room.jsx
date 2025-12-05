@@ -49,7 +49,7 @@ const ThickFloor = ({ config }) => {
     return (
         <group position={[0, -FLOOR_THICKNESS / 2, 0]}>
             {/* Main Floor Slab */}
-            <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
                 <boxGeometry args={[floorSize, floorSize, FLOOR_THICKNESS]} />
                 <meshStandardMaterial
                     color={floorColor}
@@ -78,7 +78,7 @@ const StyledWall = ({ position, rotation, width, height, wallColor, wallTopColor
         return (
             <group key={index} position={[x, 0, 0]}>
                  {/* Main Column Body */}
-                <mesh position={[0, columnHeight / 2, 0]}>
+                <mesh position={[0, columnHeight / 2, 0]} castShadow receiveShadow>
                     <boxGeometry args={[VOXEL_SIZE, columnHeight, WALL_THICKNESS]} />
                     <meshStandardMaterial
                         color={wallColor}

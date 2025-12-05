@@ -3,7 +3,7 @@ import { RoundedBox } from '@react-three/drei';
 
 // Voxel helper function with rounded edges for cuter look
 const VoxelBox = ({ position, size = [1, 1, 1], color, radius = 0.05 }) => (
-    <RoundedBox position={position} args={size} radius={radius} smoothness={4}>
+    <RoundedBox position={position} args={size} radius={radius} smoothness={4} castShadow receiveShadow>
         <meshStandardMaterial color={color} roughness={0.3} metalness={0.1} />
     </RoundedBox>
 );

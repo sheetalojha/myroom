@@ -5,7 +5,7 @@ import useStore from '../../store/useStore';
 
 // Voxel helper function
 const VoxelBox = ({ position, size = [1, 1, 1], color }) => (
-    <mesh position={position}>
+    <mesh position={position} castShadow receiveShadow>
         <boxGeometry args={size} />
         <meshStandardMaterial color={color} />
     </mesh>
