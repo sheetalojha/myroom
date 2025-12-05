@@ -236,6 +236,7 @@ const Scene = () => {
     const ssaoIntensity = useStore((state) => state.ssaoIntensity);
     const bloomIntensity = useStore((state) => state.bloomIntensity);
     const enablePostProcessing = useStore((state) => state.enablePostProcessing);
+    const enableShadows = useStore((state) => state.enableShadows);
     const isEditMode = mode === 'edit';
 
     // Get lighting preset
@@ -243,7 +244,7 @@ const Scene = () => {
 
     return (
         <Canvas 
-            shadows={false}
+            shadows={enableShadows}
             gl={{ antialias: true, alpha: true }}
             dpr={1}
             performance={{ min: 0.5 }}
@@ -263,6 +264,9 @@ const Scene = () => {
                 position={[15, 20, 10]}
                 intensity={lightingPreset.directionalIntensity}
                 color={lightingPreset.color}
+                castShadow={enableShadows}
+                shadow-mapSize={[2048, 2048]}
+                shadow-bias={-0.0001}
             />
             
             {/* Fill light from opposite side - subtle */}

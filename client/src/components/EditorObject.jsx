@@ -13,6 +13,7 @@ const EditorObject = React.memo(({ id, type, position, rotation, scale, color, d
     const isEditMode = mode === 'edit';
     const isSelected = selectedId === id;
     const groupRef = useRef();
+    const transformRef = useRef();
     const updateTimeoutRef = useRef(null);
 
     // Store object ID in userData for export functionality
@@ -42,13 +43,23 @@ const EditorObject = React.memo(({ id, type, position, rotation, scale, color, d
     // CRITICAL FIX: Debounce onChange to prevent expensive updates on every frame
     // Only update on mouseUp, not during dragging
     const handleObjectChange = useCallback(() => {
+        // Restrict vertical movement unless strictly using Y axis
+        if (transformRef.current && groupRef.current) {
+            const axis = transformRef.current.axis;
+            // If dragging any axis/plane that isn't strictly Y, lock Y to original position
+            // This fulfills: "dragging and putting something... not move them vertically... only use vertical arrow"
+            if (axis !== 'Y') {
+                groupRef.current.position.y = position[1];
+            }
+        }
+
         // Clear any pending updates
         if (updateTimeoutRef.current) {
             clearTimeout(updateTimeoutRef.current);
         }
         // Don't update during drag - only visual feedback
         // The onMouseUp handler will do the final update
-    }, []);
+    }, [position]);
 
     const handleUpdate = useCallback((props) => {
         updateObject(id, props);
@@ -73,6 +84,7 @@ const EditorObject = React.memo(({ id, type, position, rotation, scale, color, d
         <>
             {isEditMode && isSelected && !isPhysicsObject && (
                 <TransformControls
+                    ref={transformRef}
                     object={groupRef}
                     mode="translate"
                     onChange={handleObjectChange}

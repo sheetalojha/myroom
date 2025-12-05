@@ -11,17 +11,17 @@ export const Lamp = ({ color = '#ffeb3b', data = {}, onUpdate }) => {
     return (
         <group onClick={toggle}>
             {/* Base */}
-            <mesh position={[0, 0.05, 0]}>
+            <mesh position={[0, 0.05, 0]} castShadow receiveShadow>
                 <cylinderGeometry args={[0.2, 0.25, 0.1]} />
                 <meshStandardMaterial color="#212121" />
             </mesh>
             {/* Pole */}
-            <mesh position={[0, 0.55, 0]}>
+            <mesh position={[0, 0.55, 0]} castShadow receiveShadow>
                 <cylinderGeometry args={[0.02, 0.02, 1]} />
                 <meshStandardMaterial color="#212121" />
             </mesh>
             {/* Shade */}
-            <mesh position={[0, 1.1, 0]}>
+            <mesh position={[0, 1.1, 0]} castShadow>
                 <coneGeometry args={[0.3, 0.4, 32, 1, true]} />
                 <meshStandardMaterial color={color} side={2} transparent opacity={0.9} />
             </mesh>

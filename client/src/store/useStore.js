@@ -46,7 +46,7 @@ const useStore = create((set, get) => ({
   // Performance settings
   performanceMode: 'high', // 'high', 'medium', 'low'
   shadowQuality: 2048, // Shadow map size
-  enableShadows: false, // Disable shadows for performance
+  enableShadows: true, // Enable shadows for depth
   ssaoSamples: 16, // SSAO sample count
   ssaoRadius: 6, // SSAO radius
   ssaoIntensity: 30, // SSAO intensity
@@ -55,10 +55,9 @@ const useStore = create((set, get) => ({
 
   addObject: (type) => {
     const id = uuidv4();
-    // Place new object at center of room, visible position, snapped to grid
-    // Position: center of room (0, 1, 0) - 1 unit above floor (y=0) for visibility
-    // Floor top is at y=0.001, so y=1 ensures object is well above floor
-    const initialPosition = snapToGrid([0, 1, 0]);
+    // Place new object at center of room, on the floor
+    // Floor top is at y=0.001
+    const initialPosition = snapToGrid([0, 0, 0]);
     const clampedPosition = clampToRoomBounds(initialPosition);
     
     const newObject = {
