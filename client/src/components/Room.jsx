@@ -5,485 +5,117 @@ import useStore from '../store/useStore';
 const ROOM_SIZE = 20;
 const WALL_HEIGHT = 10;
 const WALL_THICKNESS = 1.5; // Thick voxel-style walls
-const FLOOR_THICKNESS = 1.0; // Thick floor slab
-const VOXEL_SIZE = 1.0; // Size of each voxel block - chunkier blocks
-const GRID_DIVISIONS = 20; // 1x1 grid cells for coordinate placement
+const FLOOR_THICKNESS = 1.5; // Thick floor slab to match walls
+const VOXEL_SIZE = 1.0; // Size of each voxel block
 
-// Create vertical noise texture for walls - continuous vertical pattern
+// Create a cleaner, subtle noise texture for the walls
 const createNoiseTexture = () => {
     const canvas = document.createElement('canvas');
     canvas.width = 64;
-    canvas.height = 512; // Taller for vertical continuity
+    canvas.height = 512;
     const ctx = canvas.getContext('2d');
     
     const imageData = ctx.createImageData(64, 512);
     const data = imageData.data;
     
-    // Create vertical noise pattern - continuous vertically
-    for (let y = 0; y < 512; y++) {
-        for (let x = 0; x < 64; x++) {
-            const index = (y * 64 + x) * 4;
-            const noise = Math.random() * 0.08 + 0.96; // Subtle noise (0.96-1.04)
-            data[index] = 255 * noise;     // R
-            data[index + 1] = 255 * noise; // G
-            data[index + 2] = 255 * noise; // B
-            data[index + 3] = 255;         // A
-        }
+    for (let i = 0; i < data.length; i += 4) {
+        // Very subtle noise for a cleaner look
+        const noise = Math.random() * 0.03 + 0.985; 
+        data[i] = 255 * noise;     // R
+        data[i + 1] = 255 * noise; // G
+        data[i + 2] = 255 * noise; // B
+        data[i + 3] = 255;         // A
     }
     
     ctx.putImageData(imageData, 0, 0);
     const texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(1, 1); // No repeating, use full texture
+    texture.repeat.set(1, 1);
     return texture;
 };
 
-// Thick Floor Slab with Medium Oak/Chestnut Wood
+// Beautiful Floor Slab - Cleaner look
 const ThickFloor = ({ config }) => {
-    const plankWidth = 1.0;
-    // Extend floor to cover under walls
-    const floorExtend = WALL_THICKNESS;
-    const floorSize = ROOM_SIZE + floorExtend * 2;
-    const planks = Math.ceil(floorSize / plankWidth);
     // Use config colors or defaults
-    const woodColor1 = config?.color || "#8B5A3C"; // Medium chestnut
-    const woodColor2 = config?.color2 || "#A06647"; // Lighter chestnut
+    const floorColor = config?.color || "#8B5A3C"; 
+    const floorColor2 = config?.color2 || "#A06647";
+    
+    // In the image, the floor fits perfectly inside the walls
+    // But we want the walls to look like they sit ON or AROUND the floor.
+    // Given the isometric view, extending the floor slightly under the walls avoids gaps.
+    const floorSize = ROOM_SIZE + WALL_THICKNESS * 2; // Extend to outer edge of walls
     
     return (
-        <group>
-            {/* Thick floor slab - bottom */}
-            <mesh 
-                rotation={[-Math.PI / 2, 0, 0]} 
-                position={[0, -FLOOR_THICKNESS / 2, 0]} 
-            >
+        <group position={[0, -FLOOR_THICKNESS / 2, 0]}>
+            {/* Main Floor Slab */}
+            <mesh rotation={[-Math.PI / 2, 0, 0]}>
                 <boxGeometry args={[floorSize, floorSize, FLOOR_THICKNESS]} />
                 <meshStandardMaterial
-                    color="#7A4F35"
-                    roughness={0.85}
+                    color={floorColor}
+                    roughness={0.8}
                     metalness={0.0}
                 />
             </mesh>
-            
-            {/* Top surface - dark chocolate wood planks */}
-            {Array.from({ length: planks }).map((_, i) => {
-                const x = (i * plankWidth) - (floorSize / 2) + (plankWidth / 2);
-                return (
-                    <mesh
-                        key={i}
-                        rotation={[-Math.PI / 2, 0, 0]}
-                        position={[x, 0.001, 0]}
-                    >
-                        <planeGeometry args={[plankWidth - 0.02, floorSize]} />
-                        <meshStandardMaterial
-                            color={i % 2 === 0 ? woodColor1 : woodColor2}
-                            roughness={0.8}
-                            metalness={0.0}
-                        />
-                    </mesh>
-                );
-            })}
-            
-            {/* Plank grain lines - darker */}
-            {Array.from({ length: planks }).map((_, i) => {
-                const x = (i * plankWidth) - (floorSize / 2);
-                return (
-                    <line key={`grain-${i}`}>
-                        <bufferGeometry>
-                            <bufferAttribute
-                                attach="attributes-position"
-                                count={2}
-                                array={new Float32Array([
-                                    x, 0.002, -floorSize / 2,
-                                    x, 0.002, floorSize / 2
-                                ])}
-                                itemSize={3}
-                            />
-                        </bufferGeometry>
-                        <lineBasicMaterial color="#1A0F0A" transparent opacity={0.4} />
-                    </line>
-                );
-            })}
         </group>
     );
 };
 
-// Floor Grid Component - Subtle coordinate system
-const FloorGrid = () => {
-    // Extend grid to match extended floor
-    const floorExtend = WALL_THICKNESS;
-    const gridSize = ROOM_SIZE + floorExtend * 2;
-    const divisions = GRID_DIVISIONS;
-    const cellSize = gridSize / divisions;
 
-    const gridGeometry = useMemo(() => {
-        const geometry = new THREE.BufferGeometry();
-        const vertices = [];
-
-        for (let i = 0; i <= divisions; i++) {
-            const pos = (i * cellSize) - (gridSize / 2);
-            
-            vertices.push(-gridSize / 2, 0.003, pos);
-            vertices.push(gridSize / 2, 0.003, pos);
-            
-            vertices.push(pos, 0.003, -gridSize / 2);
-            vertices.push(pos, 0.003, gridSize / 2);
-        }
-
-        geometry.setAttribute(
-            'position',
-            new THREE.Float32BufferAttribute(vertices, 3)
-        );
-        return geometry;
-    }, [cellSize, divisions, gridSize]);
-
-    return (
-        <group>
-            <lineSegments geometry={gridGeometry}>
-                <lineBasicMaterial
-                    color="#2C1810"
-                    transparent
-                    opacity={0.2}
-                />
-            </lineSegments>
-            
-            {/* Major grid lines - more visible */}
-            {Array.from({ length: Math.floor(divisions / 5) + 1 }).map((_, i) => {
-                const pos = (i * 5 * cellSize) - (gridSize / 2);
-                return (
-                    <group key={`major-${i}`}>
-                        <line>
-                            <bufferGeometry>
-                                <bufferAttribute
-                                    attach="attributes-position"
-                                    count={2}
-                                    array={new Float32Array([
-                                        -gridSize / 2, 0.004, pos,
-                                        gridSize / 2, 0.004, pos
-                                    ])}
-                                    itemSize={3}
-                                />
-                            </bufferGeometry>
-                            <lineBasicMaterial color="#1A0F0A" transparent opacity={0.4} />
-                        </line>
-                        <line>
-                            <bufferGeometry>
-                                <bufferAttribute
-                                    attach="attributes-position"
-                                    count={2}
-                                    array={new Float32Array([
-                                        pos, 0.004, -gridSize / 2,
-                                        pos, 0.004, gridSize / 2
-                                    ])}
-                                    itemSize={3}
-                                />
-                            </bufferGeometry>
-                            <lineBasicMaterial color="#1A0F0A" transparent opacity={0.4} />
-                        </line>
-                    </group>
-                );
-            })}
-            
-            {/* Center lines (X and Z axes) - most visible */}
-            <line>
-                <bufferGeometry>
-                    <bufferAttribute
-                        attach="attributes-position"
-                        count={2}
-                        array={new Float32Array([
-                            -gridSize / 2, 0.005, 0,
-                            gridSize / 2, 0.005, 0
-                        ])}
-                        itemSize={3}
-                    />
-                </bufferGeometry>
-                <lineBasicMaterial color="#1A0F0A" transparent opacity={0.6} />
-            </line>
-            <line>
-                <bufferGeometry>
-                    <bufferAttribute
-                        attach="attributes-position"
-                        count={2}
-                        array={new Float32Array([
-                            0, 0.005, -gridSize / 2,
-                            0, 0.005, gridSize / 2
-                        ])}
-                        itemSize={3}
-                    />
-                </bufferGeometry>
-                <lineBasicMaterial color="#1A0F0A" transparent opacity={0.6} />
-            </line>
-            
-            {/* Enhanced Origin marker - more visible */}
-            <group>
-                {/* Outer ring */}
-                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.006, 0]}>
-                    <ringGeometry args={[0.2, 0.25, 32]} />
-                    <meshBasicMaterial color="#1A0F0A" transparent opacity={0.7} />
-                </mesh>
-                {/* Inner filled circle */}
-                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.007, 0]}>
-                    <circleGeometry args={[0.15, 32]} />
-                    <meshBasicMaterial color="#1A0F0A" transparent opacity={0.8} />
-                </mesh>
-                {/* Center dot */}
-                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.008, 0]}>
-                    <circleGeometry args={[0.05, 16]} />
-                    <meshBasicMaterial color="#FFFFFF" />
-                </mesh>
-                {/* X-axis indicator line */}
-                <line>
-                    <bufferGeometry>
-                        <bufferAttribute
-                            attach="attributes-position"
-                            count={2}
-                            array={new Float32Array([
-                                0.3, 0.006, 0,
-                                0.5, 0.006, 0
-                            ])}
-                            itemSize={3}
-                        />
-                    </bufferGeometry>
-                    <lineBasicMaterial color="#1A0F0A" transparent opacity={0.6} linewidth={2} />
-                </line>
-                {/* Z-axis indicator line */}
-                <line>
-                    <bufferGeometry>
-                        <bufferAttribute
-                            attach="attributes-position"
-                            count={2}
-                            array={new Float32Array([
-                                0, 0.006, 0.3,
-                                0, 0.006, 0.5
-                            ])}
-                            itemSize={3}
-                        />
-                    </bufferGeometry>
-                    <lineBasicMaterial color="#1A0F0A" transparent opacity={0.6} linewidth={2} />
-                </line>
-            </group>
-        </group>
-    );
-};
-
-// Voxel Wall - Stacked blocks for stepped/jagged top
-const VoxelWall = ({ position, rotation, width, height, wallColor, wallTopColor }) => {
+// Styled Wall - Simplified (No steps or windows for now)
+const StyledWall = ({ position, rotation, width, height, wallColor, wallTopColor }) => {
     const noiseTexture = useMemo(() => createNoiseTexture(), []);
-    const voxelsPerWidth = Math.ceil(width / VOXEL_SIZE);
     
-    // Create stepped top pattern (jagged like stairs) - chunkier blocks
-    const createSteppedTop = (voxelIndex) => {
-        // Create a pattern: some voxels are taller, creating steps
-        const stepPattern = Math.sin(voxelIndex * 0.2) * 0.5 + 0.5; // 0 to 1
-        return stepPattern > 0.6 ? 1 : 0; // Some voxels are 1 block taller
+    // We'll build the wall out of columns to allow for future stepping effects
+    // The wall extends from -width/2 to +width/2 in its local X axis
+    
+    const renderColumn = (index, totalColumns) => {
+        const x = (index * VOXEL_SIZE) - (width / 2) + (VOXEL_SIZE / 2);
+        
+        // Simplified: Uniform height for now
+        const columnHeight = height;
+        
+        return (
+            <group key={index} position={[x, 0, 0]}>
+                 {/* Main Column Body */}
+                <mesh position={[0, columnHeight / 2, 0]}>
+                    <boxGeometry args={[VOXEL_SIZE, columnHeight, WALL_THICKNESS]} />
+                    <meshStandardMaterial
+                        color={wallColor}
+                        roughness={0.9}
+                        metalness={0.0}
+                        map={noiseTexture}
+                    />
+                </mesh>
+                
+                {/* Top Cap (Lighter Color) */}
+                <mesh position={[0, columnHeight + 0.05, 0]} rotation={[-Math.PI/2, 0, 0]}>
+                     <planeGeometry args={[VOXEL_SIZE, WALL_THICKNESS]} />
+                     <meshStandardMaterial
+                        color={wallTopColor}
+                        roughness={0.8}
+                        metalness={0.0}
+                     />
+                </mesh>
+
+                {/* Front Highlight (Simulate Edge Bevel) */}
+                <mesh position={[0, columnHeight - 0.1, WALL_THICKNESS/2 + 0.01]}>
+                     <planeGeometry args={[VOXEL_SIZE, 0.2]} />
+                     <meshStandardMaterial
+                        color={wallTopColor}
+                        transparent
+                        opacity={0.3}
+                     />
+                </mesh>
+            </group>
+        );
     };
-    
+
+    const columns = Math.ceil(width / VOXEL_SIZE);
+
     return (
         <group position={position} rotation={rotation || [0, 0, 0]}>
-            {/* Main wall body - thick box */}
-            <mesh>
-                <boxGeometry args={[width, height, WALL_THICKNESS]} />
-                <meshStandardMaterial
-                    color={wallColor}
-                    roughness={0.9}
-                    metalness={0.0}
-                    map={noiseTexture}
-                />
-            </mesh>
-            
-            {/* Stepped top - chunkier voxel blocks */}
-            {Array.from({ length: voxelsPerWidth }).map((_, i) => {
-                const x = (i * VOXEL_SIZE) - (width / 2) + (VOXEL_SIZE / 2);
-                const extraHeight = createSteppedTop(i) * VOXEL_SIZE;
-                const blockHeight = extraHeight || VOXEL_SIZE;
-                
-                return (
-                    <group key={`top-${i}`} position={[x, height / 2 + blockHeight / 2, 0]}>
-                        {/* Top face - lighter color */}
-                        <mesh
-                            position={[0, blockHeight / 2, 0]}
-                            rotation={[Math.PI / 2, 0, 0]}
-                        >
-                            <planeGeometry args={[VOXEL_SIZE - 0.02, WALL_THICKNESS]} />
-                            <meshStandardMaterial
-                                color={wallTopColor || wallColor}
-                                roughness={0.85}
-                                metalness={0.0}
-                            />
-                        </mesh>
-                        
-                        {/* Side block - with proper UV mapping */}
-                        <mesh>
-                            <boxGeometry args={[VOXEL_SIZE - 0.02, blockHeight, WALL_THICKNESS]} />
-                            <meshStandardMaterial
-                                color={wallColor}
-                                roughness={0.9}
-                                metalness={0.0}
-                                map={noiseTexture}
-                            />
-                        </mesh>
-                    </group>
-                );
-            })}
-            
-            {/* Inner face with texture */}
-            <mesh position={[0, 0, WALL_THICKNESS / 2]}>
-                <planeGeometry args={[width, height]} />
-                <meshStandardMaterial
-                    color={wallColor}
-                    roughness={0.9}
-                    metalness={0.0}
-                    map={noiseTexture}
-                />
-            </mesh>
-        </group>
-    );
-};
-
-// Back Wall with Window - Voxel style
-const BackWall = ({ config }) => {
-    const wallColor = config?.color || "#E8E8E5";
-    const wallTopColor = config?.topColor || "#F0F0ED";
-    const visible = config?.visible !== false;
-    const windowWidth = 4;
-    const windowHeight = 3;
-    const windowY = 2;
-    
-    if (!visible) return null;
-    
-    // Extend wall to match extended floor
-    const floorExtend = WALL_THICKNESS;
-    const extendedRoomSize = ROOM_SIZE + floorExtend * 2;
-    const wallZ = -extendedRoomSize / 2 - WALL_THICKNESS / 2;
-    
-    return (
-        <group position={[0, WALL_HEIGHT / 2, wallZ]}>
-            <VoxelWall
-                position={[0, 0, 0]}
-                width={extendedRoomSize}
-                height={WALL_HEIGHT}
-                wallColor={wallColor}
-                wallTopColor={wallTopColor}
-            />
-            
-            {/* Window opening */}
-            <mesh position={[0, windowY - WALL_HEIGHT / 2, WALL_THICKNESS / 2 + 0.01]}>
-                <boxGeometry args={[windowWidth + 0.3, windowHeight + 0.3, 0.2]} />
-                <meshStandardMaterial color="#D4C5B9" roughness={0.8} />
-            </mesh>
-            
-            {/* Window glass */}
-            <mesh position={[0, windowY - WALL_HEIGHT / 2, WALL_THICKNESS / 2 + 0.11]}>
-                <planeGeometry args={[windowWidth, windowHeight]} />
-                <meshStandardMaterial
-                    color="#E8F4F8"
-                    transparent
-                    opacity={0.7}
-                    roughness={0.1}
-                    metalness={0.1}
-                />
-            </mesh>
-            
-            {/* Window view */}
-            <mesh position={[0, windowY - WALL_HEIGHT / 2, WALL_THICKNESS / 2 + 0.12]}>
-                <planeGeometry args={[windowWidth - 0.1, windowHeight - 0.1]} />
-                <meshStandardMaterial color="#87CEEB" />
-            </mesh>
-            <mesh position={[0, windowY - WALL_HEIGHT / 2 + 0.5, WALL_THICKNESS / 2 + 0.13]}>
-                <planeGeometry args={[windowWidth - 0.1, (windowHeight - 0.1) * 0.6]} />
-                <meshStandardMaterial color="#E0F6FF" transparent opacity={0.8} />
-            </mesh>
-            <mesh position={[0, windowY - WALL_HEIGHT / 2 - 0.8, WALL_THICKNESS / 2 + 0.13]}>
-                <planeGeometry args={[windowWidth - 0.1, (windowHeight - 0.1) * 0.4]} />
-                <meshStandardMaterial color="#228B22" />
-            </mesh>
-        </group>
-    );
-};
-
-// Right Wall - Voxel style with stepped border
-const RightWall = ({ config }) => {
-    const wallColor = config?.color || "#D8D8D5";
-    const wallTopColor = config?.topColor || "#E5E5E2";
-    const visible = config?.visible !== false;
-    
-    if (!visible) return null;
-    
-    // Extend wall to match extended floor
-    const floorExtend = WALL_THICKNESS;
-    const extendedRoomSize = ROOM_SIZE + floorExtend * 2;
-    const wallX = -extendedRoomSize / 2 - WALL_THICKNESS / 2;
-    
-    return (
-        <group position={[wallX, WALL_HEIGHT / 2, 0]} rotation={[0, Math.PI / 2, 0]}>
-            <VoxelWall
-                position={[0, 0, 0]}
-                width={extendedRoomSize}
-                height={WALL_HEIGHT}
-                wallColor={wallColor}
-                wallTopColor={wallTopColor}
-            />
-        </group>
-    );
-};
-
-// Left Wall - Voxel style with stepped border
-const LeftWall = ({ config }) => {
-    const wallColor = config?.color || "#D8D8D5";
-    const wallTopColor = config?.topColor || "#E5E5E2";
-    const visible = config?.visible !== false;
-    
-    if (!visible) return null;
-    
-    // Extend wall to match extended floor
-    const floorExtend = WALL_THICKNESS;
-    const extendedRoomSize = ROOM_SIZE + floorExtend * 2;
-    const wallX = extendedRoomSize / 2 + WALL_THICKNESS / 2;
-    
-    return (
-        <group position={[wallX, WALL_HEIGHT / 2, 0]} rotation={[0, -Math.PI / 2, 0]}>
-            <VoxelWall
-                position={[0, 0, 0]}
-                width={extendedRoomSize}
-                height={WALL_HEIGHT}
-                wallColor={wallColor}
-                wallTopColor={wallTopColor}
-            />
-        </group>
-    );
-};
-
-// Front Wall (Bottom wall in isometric view) - Voxel style
-const FrontWall = () => {
-    const wallColor = "#F5F5F0"; // Same as back wall
-    const wallZ = ROOM_SIZE / 2 + WALL_THICKNESS / 2;
-    
-    return (
-        <group position={[0, WALL_HEIGHT / 2, wallZ]}>
-            <VoxelWall
-                position={[0, 0, 0]}
-                width={ROOM_SIZE}
-                height={WALL_HEIGHT}
-                wallColor={wallColor}
-            />
-        </group>
-    );
-};
-
-// Corner detail - Voxel style
-const CornerDetail = () => {
-    // Extend corner to match extended floor
-    const floorExtend = WALL_THICKNESS;
-    const extendedRoomSize = ROOM_SIZE + floorExtend * 2;
-    const cornerX = -extendedRoomSize / 2 - WALL_THICKNESS / 2;
-    const cornerZ = -extendedRoomSize / 2 - WALL_THICKNESS / 2;
-    
-    return (
-        <group position={[cornerX, WALL_HEIGHT / 2, cornerZ]}>
-            <mesh>
-                <boxGeometry args={[WALL_THICKNESS, WALL_HEIGHT, WALL_THICKNESS]} />
-                <meshStandardMaterial color="#9AABC6" roughness={0.7} />
-            </mesh>
+            {Array.from({ length: columns }).map((_, i) => renderColumn(i, columns))}
         </group>
     );
 };
@@ -491,25 +123,50 @@ const CornerDetail = () => {
 const Room = () => {
     const roomConfig = useStore((state) => state.roomConfig);
     
+    // Offsets to align walls perfectly at the corners
+    const offset = ROOM_SIZE / 2 + WALL_THICKNESS / 2;
+    
     return (
         <group>
-            {/* Thick Floor Slab */}
+            {/* Floor */}
             <ThickFloor config={roomConfig.floor} />
             
-            {/* Floor Grid */}
-            <FloorGrid />
+            {/* Back Wall (Right in image) - Extends along X */}
+            {roomConfig.backWall?.visible !== false && (
+                <StyledWall
+                    position={[0, 0, -ROOM_SIZE / 2 - WALL_THICKNESS / 2]}
+                    width={ROOM_SIZE + WALL_THICKNESS*2} // Extend to cover corner
+                    height={WALL_HEIGHT}
+                    wallColor={roomConfig.backWall?.color || "#E8E8E5"}
+                    wallTopColor={roomConfig.backWall?.topColor || "#F0F0ED"}
+                    rotation={[0, 0, 0]} // Along X axis
+                />
+            )}
             
-            {/* Back Wall with Window - Voxel style */}
-            <BackWall config={roomConfig.backWall} />
+            {/* Right Wall (Left in image) - Extends along Z */}
+            {/* We rotate it 90 deg around Y. It sits at -X. */}
+            {roomConfig.rightWall?.visible !== false && (
+                 <StyledWall
+                    position={[-ROOM_SIZE / 2 - WALL_THICKNESS / 2, 0, 0]}
+                    width={ROOM_SIZE + WALL_THICKNESS*2}
+                    height={WALL_HEIGHT}
+                    wallColor={roomConfig.rightWall?.color || "#D8D8D5"}
+                    wallTopColor={roomConfig.rightWall?.topColor || "#E5E5E2"}
+                    rotation={[0, Math.PI / 2, 0]} // Along Z axis
+                />
+            )}
             
-            {/* Right Wall - Voxel style */}
-            <RightWall config={roomConfig.rightWall} />
-            
-            {/* Left Wall - Voxel style */}
-            <LeftWall config={roomConfig.leftWall} />
-            
-            {/* Corner Details */}
-            <CornerDetail />
+            {/* Left Wall - usually hidden in iso view, but keeping config */}
+            {roomConfig.leftWall?.visible && (
+                <StyledWall
+                    position={[ROOM_SIZE / 2 + WALL_THICKNESS / 2, 0, 0]}
+                    width={ROOM_SIZE}
+                    height={WALL_HEIGHT}
+                    wallColor={roomConfig.leftWall?.color}
+                    wallTopColor={roomConfig.leftWall?.topColor}
+                    rotation={[0, -Math.PI / 2, 0]}
+                />
+            )}
         </group>
     );
 };
