@@ -10,11 +10,13 @@
   "miniapp": {
     "version": "1",
     "name": "LittleWorlds",
-    "iconUrl": "https://littleheaven.vercel.app/icon.png",
+    "iconUrl": "https://littleheaven.vercel.app/icon.svg",
     "homeUrl": "https://littleheaven.vercel.app",
     "imageUrl": "https://littleheaven.vercel.app/opengraph-image",
     "buttonTitle": "Enter World",
     "splashImageUrl": "https://littleheaven.vercel.app/splash.png",
-    "splashBackgroundColor": "#000000"
+    "splashBackgroundColor": "#000000",
+    "primaryCategory": "games",
+    "tags": ["world", "virtual", "exploration", "interactive", "creative"]
   }
 }
