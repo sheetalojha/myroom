@@ -14,6 +14,7 @@ import blockchainService from '../services/blockchainService';
 import { COLOR_THEMES, LIGHTING_PRESETS, WALL_COLOR_PRESETS, FLOOR_COLOR_PRESETS } from '../config/roomThemes';
 import { Button, Card } from './ui';
 import theme from '../styles/theme';
+import useIsMobile from '../hooks/useIsMobile';
 import {
     Armchair,
     Lamp,
@@ -60,6 +61,7 @@ const UIOverlay = () => {
 
     const roomConfig = useStore((state) => state.roomConfig);
     const setColorTheme = useStore((state) => state.setColorTheme);
+    const isMobile = useIsMobile();
     
     // Fetch littleworld name if editing/viewing an existing littleworld
     useEffect(() => {
@@ -93,6 +95,24 @@ const UIOverlay = () => {
             setCustomizeOpen(false);
         }
     }, [selectedId, customizeOpen]);
+
+    // On mobile, if library is open, close customize and vice versa
+    useEffect(() => {
+        if (isMobile) {
+            if (libraryOpen && customizeOpen) {
+                setCustomizeOpen(false);
+            }
+        }
+    }, [libraryOpen, isMobile]);
+
+    useEffect(() => {
+        if (isMobile) {
+            if (customizeOpen && libraryOpen) {
+                setLibraryOpen(false);
+            }
+        }
+    }, [customizeOpen, isMobile]);
+
 
     const handleSave = () => {
         const data = JSON.stringify({ objects, roomConfig });
@@ -148,7 +168,7 @@ const UIOverlay = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: `0 ${theme.spacing[6]}`,
+                padding: `0 ${isMobile ? theme.spacing[3] : theme.spacing[6]}`,
                 pointerEvents: 'auto',
                 zIndex: theme.zIndex.fixed
             }}>
@@ -156,22 +176,33 @@ const UIOverlay = () => {
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: theme.spacing[4]
+                    gap: isMobile ? theme.spacing[2] : theme.spacing[4]
                 }}>
                     {/* Logo */}
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: theme.spacing[2]
-                    }}>
+                        gap: theme.spacing[2],
+                        cursor: 'pointer'
+                    }} onClick={() => window.location.href = '/'}>
                         <span style={{
                             fontSize: theme.typography.fontSize.lg,
                             fontWeight: theme.typography.fontWeight.semibold,
                             color: theme.colors.text.primary,
-                            letterSpacing: theme.typography.letterSpacing.tight
+                            letterSpacing: theme.typography.letterSpacing.tight,
+                            display: isMobile ? 'none' : 'block'
                         }}>
                             LittleWorlds
                         </span>
+                        {isMobile && (
+                            <span style={{
+                                fontSize: theme.typography.fontSize.lg,
+                                fontWeight: theme.typography.fontWeight.bold,
+                                color: theme.colors.text.primary,
+                            }}>
+                                LW
+                            </span>
+                        )}
                     </div>
 
                     {/* Mode Toggle */}
@@ -200,7 +231,7 @@ const UIOverlay = () => {
                             }}
                         >
                             <Edit3 size={14} />
-                            Edit
+                            {isMobile ? '' : 'Edit'}
                         </button>
                         <button
                             onClick={() => setMode('view')}
@@ -220,7 +251,7 @@ const UIOverlay = () => {
                             }}
                         >
                             <Eye size={14} />
-                            View
+                            {isMobile ? '' : 'View'}
                         </button>
                     </div>
 
@@ -264,7 +295,7 @@ const UIOverlay = () => {
             </div>
 
             {/* Top Right - Floating Save/Load Buttons - only in edit mode */}
-            {isEditMode && (
+            {isEditMode && !isMobile && (
                 <div style={{
                     position: 'absolute',
                     top: 72,
@@ -296,6 +327,28 @@ const UIOverlay = () => {
                 </div>
             )}
 
+            {/* Mobile Save/Load - In a simplified location or menu */}
+             {isEditMode && isMobile && (
+                 <div style={{
+                    position: 'fixed',
+                    bottom: 80, // Above bottom panel
+                    right: theme.spacing[3],
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: theme.spacing[2],
+                    pointerEvents: 'auto',
+                    zIndex: theme.zIndex.fixed
+                 }}>
+                     <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleSave}
+                        icon={Save}
+                        style={{ backgroundColor: 'white', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}
+                    />
+                 </div>
+             )}
+
             {/* Bottom Horizontal Section - Publish Panel & My Rooms - only in edit mode */}
             {isEditMode && (
                 <div style={{
@@ -307,7 +360,10 @@ const UIOverlay = () => {
                     alignItems: 'center',
                     gap: theme.spacing[3],
                     pointerEvents: 'auto',
-                    zIndex: theme.zIndex.fixed
+                    zIndex: theme.zIndex.fixed,
+                    width: isMobile ? '90%' : 'auto',
+                    justifyContent: 'center',
+                    flexWrap: isMobile ? 'wrap' : 'nowrap'
                 }}>
                     <PublishPanel />
                     <Button
@@ -326,24 +382,29 @@ const UIOverlay = () => {
                 <ObjectTransformPanel onClose={() => selectObject(null)} />
             )}
 
-            {/* Right Sidebar - Customization Panel - only in edit mode when no object selected */}
+            {/* Customization Panel - only in edit mode when no object selected */}
             {isEditMode && customizeOpen && !selectedId && (
                 <Card
                     variant="simple"
                     padding="none"
                     style={{
                         position: 'absolute',
-                        top: 72,
-                        right: theme.spacing[6],
-                        bottom: theme.spacing[6],
-                        width: 320,
-                        maxHeight: 'calc(100vh - 96px)',
+                        top: isMobile ? 'auto' : 72,
+                        right: isMobile ? 0 : theme.spacing[6],
+                        bottom: isMobile ? 0 : theme.spacing[6],
+                        left: isMobile ? 0 : 'auto',
+                        width: isMobile ? '100%' : 320,
+                        height: isMobile ? '50vh' : 'auto',
+                        maxHeight: isMobile ? '50vh' : 'calc(100vh - 96px)',
+                        borderRadius: isMobile ? '20px 20px 0 0' : theme.borderRadius.md,
                         display: 'flex',
                         flexDirection: 'column',
                         pointerEvents: 'auto',
                         overflow: 'hidden',
                         zIndex: theme.zIndex.dropdown,
-                        border: `1px solid ${theme.colors.border.medium}`
+                        border: `1px solid ${theme.colors.border.medium}`,
+                        borderBottom: isMobile ? 'none' : `1px solid ${theme.colors.border.medium}`,
+                        boxShadow: isMobile ? '0 -4px 20px rgba(0,0,0,0.1)' : 'none'
                     }}
                 >
                     <div style={{
@@ -351,16 +412,32 @@ const UIOverlay = () => {
                         borderBottom: `1px solid ${theme.colors.border.medium}`,
                         display: 'flex',
                         alignItems: 'center',
+                        justifyContent: 'space-between',
                         gap: theme.spacing[2]
                     }}>
-                        <Settings size={16} color={theme.colors.text.primary} />
-                        <span style={{
-                            fontSize: theme.typography.fontSize.md,
-                            fontWeight: theme.typography.fontWeight.semibold,
-                            color: theme.colors.text.primary
-                        }}>
-                            Customize Room
-                        </span>
+                        <div style={{display: 'flex', alignItems: 'center', gap: theme.spacing[2]}}>
+                            <Settings size={16} color={theme.colors.text.primary} />
+                            <span style={{
+                                fontSize: theme.typography.fontSize.md,
+                                fontWeight: theme.typography.fontWeight.semibold,
+                                color: theme.colors.text.primary
+                            }}>
+                                Customize Room
+                            </span>
+                        </div>
+                         {isMobile && (
+                            <button 
+                                onClick={() => setCustomizeOpen(false)}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    padding: 4
+                                }}
+                            >
+                                <X size={20} />
+                            </button>
+                        )}
                     </div>
 
                     <div style={{
@@ -623,25 +700,51 @@ const UIOverlay = () => {
                 </Card>
             )}
 
-            {/* Left Sidebar - Floating Library Card - only in edit mode */}
+            {/* Library Card - only in edit mode */}
             {isEditMode && libraryOpen && (
                 <Card
                     variant="simple"
                     padding="none"
                     style={{
                         position: 'absolute',
-                        top: 72,
-                        left: theme.spacing[6],
-                        bottom: theme.spacing[6],
-                        width: 300,
+                        top: isMobile ? 'auto' : 72,
+                        left: isMobile ? 0 : theme.spacing[6],
+                        bottom: isMobile ? 0 : theme.spacing[6],
+                        right: isMobile ? 0 : 'auto',
+                        width: isMobile ? '100%' : 300,
+                        height: isMobile ? '50vh' : 'auto',
+                        maxHeight: isMobile ? '50vh' : 'calc(100vh - 96px)',
+                        borderRadius: isMobile ? '20px 20px 0 0' : theme.borderRadius.md,
                         display: 'flex',
                         flexDirection: 'column',
                         pointerEvents: 'auto',
                         overflow: 'hidden',
                         zIndex: theme.zIndex.dropdown,
-                        border: `1px solid ${theme.colors.border.medium}`
+                        border: `1px solid ${theme.colors.border.medium}`,
+                        borderBottom: isMobile ? 'none' : `1px solid ${theme.colors.border.medium}`,
+                        boxShadow: isMobile ? '0 -4px 20px rgba(0,0,0,0.1)' : 'none'
                     }}
                 >
+                     {isMobile && (
+                         <div style={{
+                            padding: theme.spacing[2],
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                            borderBottom: `1px solid ${theme.colors.border.medium}`
+                         }}>
+                             <button 
+                                onClick={() => setLibraryOpen(false)}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    padding: 4
+                                }}
+                            >
+                                <X size={20} />
+                            </button>
+                         </div>
+                     )}
                     {/* Categories */}
                     <div style={{
                         display: 'flex',
@@ -752,35 +855,37 @@ const UIOverlay = () => {
                 </Card>
             )}
 
-            {/* Bottom Left - Floating Room Info */}
-            <Card
-                variant="simple"
-                padding="sm"
-                style={{
-                    position: 'absolute',
-                    bottom: theme.spacing[6],
-                    left: theme.spacing[6],
-                    pointerEvents: 'auto',
-                    zIndex: theme.zIndex.fixed,
-                    border: `1px solid ${theme.colors.border.medium}`
-                }}
-            >
-                <div style={{
-                    fontSize: theme.typography.fontSize.base,
-                    fontWeight: theme.typography.fontWeight.semibold,
-                    color: theme.colors.text.primary,
-                    letterSpacing: theme.typography.letterSpacing.tight,
-                    maxWidth: 200,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                }}>
-                    {chamberName}
-                </div>
-            </Card>
+            {/* Bottom Left - Floating Room Info - hide on mobile edit mode if covered */}
+            {(!isMobile || !isEditMode) && (
+                <Card
+                    variant="simple"
+                    padding="sm"
+                    style={{
+                        position: 'absolute',
+                        bottom: theme.spacing[6],
+                        left: theme.spacing[6],
+                        pointerEvents: 'auto',
+                        zIndex: theme.zIndex.fixed,
+                        border: `1px solid ${theme.colors.border.medium}`
+                    }}
+                >
+                    <div style={{
+                        fontSize: theme.typography.fontSize.base,
+                        fontWeight: theme.typography.fontWeight.semibold,
+                        color: theme.colors.text.primary,
+                        letterSpacing: theme.typography.letterSpacing.tight,
+                        maxWidth: 200,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                    }}>
+                        {chamberName}
+                    </div>
+                </Card>
+            )}
 
             {/* Human Controls Hint - only in view mode when human exists */}
-            {!isEditMode && objects.some(obj => obj.type === 'human') && (
+            {!isEditMode && objects.some(obj => obj.type === 'human') && !isMobile && (
                 <Card
                     variant="simple"
                     padding="md"
@@ -812,7 +917,7 @@ const UIOverlay = () => {
                     </div>
                 </Card>
             )}
-
+            
             {/* Leva Panel (Properties) - only in edit mode when object selected and transform panel not shown */}
             {isEditMode && selectedId && false && (
                 <div style={{

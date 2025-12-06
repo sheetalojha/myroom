@@ -1,6 +1,7 @@
 import React from 'react';
 import useStore from '../store/useStore';
 import { X, RotateCw, Move, Maximize2, Palette, Trash2 } from 'lucide-react';
+import useIsMobile from '../hooks/useIsMobile';
 
 const ObjectTransformPanel = ({ onClose }) => {
     const selectedId = useStore((state) => state.selectedId);
@@ -8,6 +9,7 @@ const ObjectTransformPanel = ({ onClose }) => {
     const updateObject = useStore((state) => state.updateObject);
     const removeObject = useStore((state) => state.removeObject);
     const selectObject = useStore((state) => state.selectObject);
+    const isMobile = useIsMobile();
 
     const selectedObject = objects.find(obj => obj.id === selectedId);
 
@@ -57,20 +59,22 @@ const ObjectTransformPanel = ({ onClose }) => {
     return (
         <div style={{
             position: 'absolute',
-            top: 72,
-            right: 24,
-            bottom: 24,
-            width: 340,
-            maxHeight: 'calc(100vh - 96px)',
+            top: isMobile ? 'auto' : 72,
+            right: isMobile ? 0 : 24,
+            bottom: isMobile ? 0 : 24,
+            left: isMobile ? 0 : 'auto',
+            width: isMobile ? '100%' : 340,
+            maxHeight: isMobile ? '50vh' : 'calc(100vh - 96px)',
             background: 'rgba(255,255,255,0.98)',
             backdropFilter: 'blur(20px)',
-            borderRadius: '12px',
+            borderRadius: isMobile ? '20px 20px 0 0' : '12px',
             boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
             display: 'flex',
             flexDirection: 'column',
             pointerEvents: 'auto',
             overflow: 'hidden',
             border: '1px solid rgba(0,0,0,0.05)',
+            borderBottom: isMobile ? 'none' : '1px solid rgba(0,0,0,0.05)',
             zIndex: 90
         }}>
             {/* Header */}
@@ -509,4 +513,3 @@ const ObjectTransformPanel = ({ onClose }) => {
 };
 
 export default ObjectTransformPanel;
-
