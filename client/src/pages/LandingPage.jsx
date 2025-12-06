@@ -5,10 +5,12 @@ import { ArrowRight, Home } from 'lucide-react';
 import WalletConnect from '../components/WalletConnect';
 import { Button, Card } from '../components/ui';
 import theme from '../styles/theme';
+import useIsMobile from '../hooks/useIsMobile';
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const { isConnected } = useAccount();
+  const isMobile = useIsMobile();
 
   return (
     <>
@@ -43,86 +45,59 @@ const LandingPage = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: `${theme.spacing[20]} ${theme.spacing[10]} ${theme.spacing[10]} ${theme.spacing[10]}`,
-        position: 'relative'
+        padding: `${isMobile ? theme.spacing[16] : theme.spacing[20]} ${theme.spacing[6]} ${theme.spacing[10]} ${theme.spacing[6]}`,
+        position: 'relative',
+        minHeight: '100vh'
       }}>
-        {/* Voxel SVGs - Scattered around the page with animations - moved further out */}
-        <div style={{
-          position: 'absolute',
-          top: '15%',
-          left: '-2%', // Moved further outside
-          width: '220px',
-          height: '220px',
-          zIndex: 1,
-          opacity: 0.8
-        }}>
-          <img 
-            src="/Group 5.svg" 
-            alt="Voxel decoration" 
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain'
-            }}
-          />
-        </div>
-        <div style={{
-          position: 'absolute',
-          top: '10%',
-          right: '-2%', // Moved further outside
-          width: '200px',
-          height: '200px',
-          zIndex: 1,
-          opacity: 0.75
-        }}>
-          <img 
-            src="/Group 6.svg" 
-            alt="Voxel decoration" 
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain'
-            }}
-          />
-        </div>
-        <div style={{
-          position: 'absolute',
-          bottom: '5%',
-          left: '-2%', // Moved further outside
-          width: '210px',
-          height: '210px',
-          zIndex: 1,
-          opacity: 0.7
-        }}>
-          <img 
-            src="/Group 4.svg" 
-            alt="Voxel decoration" 
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain'
-            }}
-          />
-        </div>
-        <div style={{
-          position: 'absolute',
-          bottom: '15%',
-          right: '-2%', // Moved further outside
-          width: '240px',
-          height: '240px',
-          zIndex: 1,
-          opacity: 0.8
-        }}>
-          <img 
-            src="/Group 3.svg" 
-            alt="Voxel decoration" 
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain'
-            }}
-          />
-        </div>
+        {/* Voxel SVGs - Hidden on mobile to reduce clutter or sized down */}
+        {!isMobile && (
+            <>
+                <div style={{
+                  position: 'absolute',
+                  top: '15%',
+                  left: '-2%',
+                  width: '220px',
+                  height: '220px',
+                  zIndex: 1,
+                  opacity: 0.8
+                }}>
+                  <img src="/Group 5.svg" alt="Voxel decoration" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                </div>
+                <div style={{
+                  position: 'absolute',
+                  top: '10%',
+                  right: '-2%',
+                  width: '200px',
+                  height: '200px',
+                  zIndex: 1,
+                  opacity: 0.75
+                }}>
+                  <img src="/Group 6.svg" alt="Voxel decoration" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                </div>
+                <div style={{
+                  position: 'absolute',
+                  bottom: '5%',
+                  left: '-2%',
+                  width: '210px',
+                  height: '210px',
+                  zIndex: 1,
+                  opacity: 0.7
+                }}>
+                  <img src="/Group 4.svg" alt="Voxel decoration" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                </div>
+                <div style={{
+                  position: 'absolute',
+                  bottom: '15%',
+                  right: '-2%',
+                  width: '240px',
+                  height: '240px',
+                  zIndex: 1,
+                  opacity: 0.8
+                }}>
+                  <img src="/Group 3.svg" alt="Voxel decoration" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                </div>
+            </>
+        )}
 
       {/* Header */}
       <div style={{
@@ -141,7 +116,7 @@ const LandingPage = () => {
           display: 'flex',
           alignItems: 'center',
           gap: theme.spacing[2],
-          background: 'transparent', // Transparent background
+          background: 'transparent',
         }}>
           <Home size={20} color={theme.colors.text.tertiary} />
           <h2 style={{
@@ -167,7 +142,7 @@ const LandingPage = () => {
         zIndex: 2
       }}>
         <h1 style={{
-          fontSize: theme.typography.fontSize['5xl'],
+          fontSize: isMobile ? theme.typography.fontSize['4xl'] : theme.typography.fontSize['5xl'],
           fontWeight: theme.typography.fontWeight.medium,
           margin: `0 0 ${theme.spacing[5]} 0`,
           lineHeight: theme.typography.lineHeight.tight,
@@ -192,13 +167,14 @@ const LandingPage = () => {
         </h1>
         
         <p style={{
-          fontSize: theme.typography.fontSize.lg,
+          fontSize: isMobile ? theme.typography.fontSize.md : theme.typography.fontSize.lg,
           color: theme.colors.text.tertiary,
           margin: `0 0 ${theme.spacing[12]} 0`,
           lineHeight: theme.typography.lineHeight.normal,
           textAlign: 'center',
           maxWidth: '550px',
-          fontWeight: theme.typography.fontWeight.normal
+          fontWeight: theme.typography.fontWeight.normal,
+          padding: isMobile ? `0 ${theme.spacing[4]}` : 0
         }}>
           On-chain ownership. Portable across apps. Discover rewards in-world.
         </p>
@@ -209,12 +185,15 @@ const LandingPage = () => {
           gap: theme.spacing[4],
           justifyContent: 'center',
           flexWrap: 'wrap',
-          alignItems: 'center'
+          alignItems: 'center',
+          flexDirection: isMobile ? 'column' : 'row',
+          width: isMobile ? '100%' : 'auto'
         }}>
           {!isConnected ? (
             <Card padding="md" style={{
               background: theme.colors.primary[100],
               color: theme.colors.text.tertiary,
+              width: isMobile ? '100%' : 'auto'
             }}>
               Connect wallet to continue
             </Card>
@@ -226,6 +205,7 @@ const LandingPage = () => {
                 onClick={() => navigate('/editor')}
                 icon={ArrowRight}
                 iconPosition="right"
+                style={{ width: isMobile ? '100%' : 'auto' }}
               >
                 Create LittleWorld
               </Button>
@@ -235,6 +215,7 @@ const LandingPage = () => {
                 onClick={() => navigate('/explore')}
                 icon={ArrowRight}
                 iconPosition="right"
+                style={{ width: isMobile ? '100%' : 'auto' }}
               >
                 Browse LittleWorlds
               </Button>
@@ -283,8 +264,8 @@ const LandingPage = () => {
         maxWidth: '1200px',
         marginTop: theme.spacing[20],
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr 1fr',
-        gridTemplateRows: 'auto auto',
+        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr',
+        gridTemplateRows: isMobile ? 'auto' : 'auto auto',
         gap: theme.spacing[5],
         paddingBottom: theme.spacing[20]
       }}>
@@ -293,7 +274,7 @@ const LandingPage = () => {
           padding="none"
           hover
           style={{
-            gridRow: 'span 2',
+            gridRow: isMobile ? 'auto' : 'span 2',
             display: 'flex',
             flexDirection: 'column',
             height: '100%'
@@ -348,7 +329,7 @@ const LandingPage = () => {
           padding="lg"
           hover
           style={{
-            gridColumn: '2',
+            gridColumn: isMobile ? 'auto' : '2',
             display: 'flex',
             flexDirection: 'column',
             height: '100%'
@@ -381,7 +362,7 @@ const LandingPage = () => {
           padding="lg"
           hover
           style={{
-            gridColumn: '3',
+            gridColumn: isMobile ? 'auto' : '3',
             display: 'flex',
             flexDirection: 'column',
             height: '100%'
@@ -414,8 +395,8 @@ const LandingPage = () => {
           padding="lg"
           hover
           style={{
-            gridColumn: '2 / span 2',
-            gridRow: '2',
+            gridColumn: isMobile ? 'auto' : '2 / span 2',
+            gridRow: isMobile ? 'auto' : '2',
             display: 'flex',
             flexDirection: 'column',
             height: '100%'

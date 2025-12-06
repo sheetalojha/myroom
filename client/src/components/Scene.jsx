@@ -13,47 +13,52 @@ import * as THREE from 'three';
 // 45° Y-axis rotation, ~35.264° X-axis rotation (arctan(1/sqrt(2)))
 const ISOMETRIC_POLAR_ANGLE = Math.PI / 2 - Math.atan(1 / Math.sqrt(2)); // ~35.264° from horizontal
 const ISOMETRIC_AZIMUTH_ANGLE = Math.PI / 4; // 45° rotation
-const ISOMETRIC_ZOOM = 38; // Orthographic zoom level
 
 // Custom Orthographic Camera Setup
 const OrthographicCamera = () => {
     const { size, set } = useThree();
     
     useEffect(() => {
+        const isMobile = size.width < 768;
+        
+        // Dynamic zoom calculation
+        // Target world width: Mobile ~42 units (tight fit), Desktop ~90 units (spacious)
+        const targetWorldWidth = isMobile ? 42 : 90;
+        const zoom = (size.width * 2) / targetWorldWidth; // Note: Using *2 because left is -width/zoom, right is width/zoom, so total width is 2*width/zoom. wait.
+        // Ortho left = -size.width / zoom
+        // Width = (size.width/zoom) - (-size.width/zoom) = 2 * size.width / zoom
+        // We want Width = targetWorldWidth
+        // targetWorldWidth = 2 * size.width / zoom
+        // zoom = 2 * size.width / targetWorldWidth
+        
+        const finalZoom = zoom;
+
         // Create orthographic camera
         const orthoCamera = new THREE.OrthographicCamera(
-            -size.width / ISOMETRIC_ZOOM,
-            size.width / ISOMETRIC_ZOOM,
-            size.height / ISOMETRIC_ZOOM,
-            -size.height / ISOMETRIC_ZOOM,
+            -size.width / finalZoom,
+            size.width / finalZoom,
+            size.height / finalZoom,
+            -size.height / finalZoom,
             0.1,
             100
         );
         
         // Set isometric position
+        // Offset Y negatively on mobile to shift the room UP (so it's not covered by bottom sheet)
+        const mobileYOffset = isMobile ? -4 : 0;
+        
         const distance = 25;
         const x = distance * Math.sin(ISOMETRIC_POLAR_ANGLE) * Math.cos(ISOMETRIC_AZIMUTH_ANGLE);
-        const y = distance * Math.cos(ISOMETRIC_POLAR_ANGLE);
+        const y = distance * Math.cos(ISOMETRIC_POLAR_ANGLE) + mobileYOffset;
         const z = distance * Math.sin(ISOMETRIC_POLAR_ANGLE) * Math.sin(ISOMETRIC_AZIMUTH_ANGLE);
         
         orthoCamera.position.set(x, y, z);
-        orthoCamera.lookAt(0, 0, 0);
+        orthoCamera.lookAt(0, mobileYOffset, 0); // Look at the offset center
         orthoCamera.updateProjectionMatrix();
         
         // Replace camera in the scene
         set({ camera: orthoCamera });
         
-        // Handle resize
-        const handleResize = () => {
-            orthoCamera.left = -size.width / ISOMETRIC_ZOOM;
-            orthoCamera.right = size.width / ISOMETRIC_ZOOM;
-            orthoCamera.top = size.height / ISOMETRIC_ZOOM;
-            orthoCamera.bottom = -size.height / ISOMETRIC_ZOOM;
-            orthoCamera.updateProjectionMatrix();
-        };
-        
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
     }, [size, set]);
     
     return null;

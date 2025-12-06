@@ -1,0 +1,20 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjM2MjEsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgyY2Q4NWEwOTMyNjFmNTkyNzA4MDRBNkVBNjk3Q2VBNENlQkVjYWZFIn0",
+    "payload": "eyJkb21haW4iOiJleGFtcGxlLmNvbSJ9",
+    "signature": "MHgwZmJiYWIwODg3YTU2MDFiNDU3MzVkOTQ5MDRjM2Y1NGUxMzVhZTQxOGEzMWQ5ODNhODAzZmZlYWNlZWMyZDYzNWY4ZTFjYWU4M2NhNTAwOTMzM2FmMTc1NDlmMDY2YTVlOWUwNTljNmZiNDUxMzg0Njk1NzBhODNiNjcyZWJjZTFi"
+  },
+  "baseBuilder": {
+    "ownerAddress": "0x7F23F30796F54a44a7A95d8f8c8Be1dB017C3397"
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "LittleWorlds",
+    "iconUrl": "https://littleheaven.vercel.app/icon.png",
+    "homeUrl": "https://littleheaven.vercel.app",
+    "imageUrl": "https://littleheaven.vercel.app/opengraph-image",
+    "buttonTitle": "Enter World",
+    "splashImageUrl": "https://littleheaven.vercel.app/splash.png",
+    "splashBackgroundColor": "#000000"
+  }
+}
